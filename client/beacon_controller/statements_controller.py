@@ -199,6 +199,7 @@ def get_statements(s, edge_label=None, relation=None, t=None, keywords=None, cat
 
         beacon_statement = BeaconStatement(
             id=statement['statement_id'],
+            source=statement['source_uri'],
             subject=beacon_subject,
             predicate=beacon_predicate,
             object=beacon_object

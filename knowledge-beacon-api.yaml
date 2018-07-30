@@ -651,6 +651,12 @@ paths:
               title: BeaconStatement
               type: object
               properties:
+                source:
+                  type: string
+                  description: >-
+                    The URI endpoint or knowledge source that this statement was
+                    taken from. This is useful for beacon instances that report
+                    data from multiple sources.
                 id:
                   type: string
                   description: >-
