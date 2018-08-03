@@ -12,46 +12,16 @@ from beacon_controller.models import Association
 from typing import List
 from collections import defaultdict
 
+import json_parser
+
+from pprint import pprint
+
+from beacon_controller.utils import safe_get
+from beacon_controller import crawler
+
 def get_statement_details(statementId, keywords=None, size=None):
-    from biothings_explorer_test import MetaData
-    metadata = MetaData()
-    return metadata.list_all_api_resources()
+    return BeaconStatementWithDetails()
 
-    from biothings_explorer import BioThingsExplorer
-
-    b = BioThingsExplorer()
-
-    x = b.show_available_bioentities()
-
-    return None
-
-def get_apis(sources:List[str], targets:List[str]=None, relation:str=None, categories:List[str]=None):
-    """
-    Returns the API's that fulfill the given search constraints
-    """
-
-    pattern = re.compile('\{.*\}')
-
-    from biothings_explorer_test import APILocator
-    locator = APILocator()
-
-    source_apis = []
-
-    for source_id in sources:
-        prefix, identifier = source_id.split(':', 1)
-        source_apis.extend(locator.locate_apis_by_input_prefix_only(input_prefix=prefix.lower()))
-
-    if categories != None:
-        source_apis = [a for a in source_apis if a['object']['semantic_type'] in categories]
-
-    if relation != None:
-        source_apis = [a for a in source_apis if a['predicate'] == relation]
-
-    if targets != None:
-        target_prefixes = [t.split(':')[0].lower() for t in targets if ':' in t]
-        source_apis = [a for a in source_apis if a['object']['prefix'] in target_prefixes]
-
-    return source_apis
 
 def perform_get_request(uri_pattern, identifier):
     pattern = re.compile('\{.*\}')
@@ -72,65 +42,87 @@ def perform_get_request(uri_pattern, identifier):
 
     return response, uri
 
-def parse(parse_dict, data):
-    if isinstance(parse_dict, dict):
-        key = list(parse_dict.keys())[0]
-        return parse(parse_dict[key], data[key])
-    elif isinstance(parse_dict, list):
-        return [parse(parse_dict[0], item) for item in data]
-    elif isinstance(parse_dict, str):
-        if parse_dict == '*':
-            if isinstance(data, list):
-                return ', '.join(data)
-            elif isinstance(data, str):
-                return data
-            else:
-                return str(data)
-    else:
-        raise Exception('could not parse {} with {}'.format(data, parse_dict))
-
-def get_value(data, endpoint, field_name):
-    s = endpoint[field_name]
-
-    if s == None:
-        return None
-
-    s = re.sub(r'(\w+|\*)', r'"\1"', s)
-    parse_dict = json.loads(s)
-    return parse(parse_dict, data)
-
-def construct_statements(d):
-    def _construct_statements(d):
-        statements = []
-        flat_dict = {}
-        for key, value in d.items():
-            if not isinstance(value, list):
-                flat_dict[key] = value
-                continue
-
-            for i, item in enumerate(value):
-                if len(statements) < i + 1:
-                    statements.append({
-                        key: item
-                    })
-                else:
-                    statements[i][key] = item
-
-        for statement in statements:
-            statements.extend(_construct_statements(statement))
-
-        for statement in statements:
-            for key, value in flat_dict.items():
-                statement[key] = value
-
-        return [s for s in statements if not any(isinstance(value, list) for value in s.values())]
-
-    if all(not isinstance(value, list) for value in d.values()):
-        return [d]
-    else:
-        return _construct_statements(d)
+from biothings_explorer_test import fetch_output
+from pprint import pprint
 
 def get_statements(s, edge_label=None, relation=None, t=None, keywords=None, categories=None, size=None):
+    statements = []
+
+    for subject_id in s:
+        data = crawler.crawl(subject_id)
+
+        if data == {}:
+            continue
+
+        subject_names = []
+        for category, associations in data.items():
+            for a in associations:
+                if a.get('predicate') == 'EquivalentAssociation':
+                    object_id = safe_get(a, 'object', 'id')
+                    object_name = safe_get(a, 'object', 'label')
+
+                    if object_name != None:
+                        subject_names.append(object_name)
+                        pprint(a)
+
+                    else:
+                        object_prefix, object_local_id = object_id.split(':', 1)
+                        if 'name' in object_prefix.lower():
+                            subject_names.append(object_local_id)
+                            pprint(a)
+
+        predicate_longest_under_sixty = lambda n: (len(n) > 60, -len(n))
+        subject_names.sort(key=predicate_longest_under_sixty)
+
+        subject_name = None if len(subject_names) == 0 else subject_names[0]
+
+        for category, associations in data.items():
+            category = None if category == "null" else category
+
+            prefix, _ = subject_id.split(':', 1)
+
+            for a in associations:
+                beacon_subject = BeaconStatementSubject(
+                    id=subject_id,
+                    name=subject_name,
+                    category=utils.lookup_category(prefix)
+                )
+
+                beacon_object = BeaconStatementObject(
+                    id=safe_get(a, 'object', 'id'),
+                    name=safe_get(a, 'object', 'label'),
+                    category=category
+                )
+
+                edge_label = safe_get(a, 'edge', 'label')
+                if edge_label == None:
+                    edge_label = safe_get(a, 'predicate')
+
+                beacon_predicate = BeaconStatementPredicate(
+                    edge_label=edge_label,
+                    relation=safe_get(a, 'edge', 'id'),
+                    negated=None
+                )
+
+                beacon_statement = BeaconStatement(
+                    id=None,
+                    source=None,
+                    subject=beacon_subject,
+                    predicate=beacon_predicate,
+                    object=beacon_object
+                )
+
+                statements.append(beacon_statement)
+
+    return statements
+
+def get_statements2(s, edge_label=None, relation=None, t=None, keywords=None, categories=None, size=None):
+    biothings_apis = get_apis(sources=s, targets=t, relation=relation, categories=categories)
+
+    for api in biothings_apis:
+        parser = json_parser.Parser('../endpoints.yaml')
+        records = parser.perform_requst_and_parse_response(api['endpoint'], )
+
     with open('../endpoints.yaml', 'r') as stream:
         endpoint_mappings = yaml.load(stream)
         endpoint_mappings = {e['uri'] : e for e in endpoint_mappings}
@@ -145,6 +137,8 @@ def get_statements(s, edge_label=None, relation=None, t=None, keywords=None, cat
         for api in biothings_apis:
             if api['subject']['prefix'] == prefix.lower() and api['endpoint'] not in used_endpoints:
                 used_endpoints.append(api['endpoint'])
+                if not api['endpoint'].startswith('http://mydisease.info/v1/disease/'):
+                    continue
 
                 try:
                     response, response_uri = perform_get_request(api['endpoint'], global_id)
@@ -152,11 +146,12 @@ def get_statements(s, edge_label=None, relation=None, t=None, keywords=None, cat
                     print(e)
                     continue
 
-                fields = ['subject_name', 'subject_id', 'object_name', 'object_id', 'predicate', 'statement_id']
+                mapping = endpoint_mappings[api['endpoint']]
                 results = {}
-                endpoint = endpoint_mappings[api['endpoint']]
-                for field in fields:
-                    results[field] = get_value(response.json(), endpoint, field)
+                for key, decoder in mapping.items():
+                    if key == 'uri' or key == 'example':
+                        continue
+                    results[key] = get_value(response.json(), decoder)
 
                 if results['subject_id'] == None:
                     results['subject_id'] = global_id
@@ -169,42 +164,7 @@ def get_statements(s, edge_label=None, relation=None, t=None, keywords=None, cat
 
                 results['source_uri'] = response_uri
                 s = construct_statements(results)
-                for ss in s:
-                    if ':' not in ss['object_id']:
-                        ss['object_id'] = '{}:{}'.format(api['object']['prefix'], ss['object_id'])
                 statements.extend(s)
 
     if size != None:
         statements = statements[:size]
-
-    beacon_statements = []
-    for statement in statements:
-        beacon_subject = BeaconStatementSubject(
-            id=statement['subject_id'],
-            name=statement['subject_name'],
-            category=statement['subject_category']
-        )
-
-        beacon_object = BeaconStatementObject(
-            id=statement['object_id'],
-            name=statement['object_name'],
-            category=statement['object_category']
-        )
-
-        beacon_predicate = BeaconStatementPredicate(
-            edge_label=statement['predicate'],
-            relation=statement['predicate'],
-            negated=None
-        )
-
-        beacon_statement = BeaconStatement(
-            id=statement['statement_id'],
-            source=statement['source_uri'],
-            subject=beacon_subject,
-            predicate=beacon_predicate,
-            object=beacon_object
-        )
-
-        beacon_statements.append(beacon_statement)
-
-    return beacon_statements

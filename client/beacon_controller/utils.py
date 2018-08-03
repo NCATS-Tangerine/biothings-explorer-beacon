@@ -7,7 +7,62 @@ These methods are fallible heuristics for pulling the relevant information out
 of those variable responses.
 """
 
+import requests
 from neomodel import NodeSet
+from typing import List
+
+
+_response = requests.get('http://biothings.io/explorer/api/v2/metadata/bioentities').json()
+_category_map = {}
+for category, prefixes in _response['bioentity'].items():
+    for prefix in prefixes:
+        _category_map[prefix] = category
+
+def lookup_category(prefix:str):
+    """
+    Returns the category that this prefix belongs to
+    """
+    return _category_map.get(prefix.lower())
+
+def safe_get(d:dict, *vkeys):
+    if len(vkeys) < 1:
+        return None
+    elif len(vkeys) == 1:
+        return d.get(vkeys[0], None)
+    else:
+        value = d.get(vkeys[0])
+        if isinstance(value, dict):
+            return safe_get(value, *vkeys[1:])
+        else:
+            return None
+
+def get_apis(sources:List[str], targets:List[str]=None, relation:str=None, categories:List[str]=None):
+    """
+    Returns the API's that fulfill the given search constraints
+    """
+
+    pattern = re.compile('\{.*\}')
+
+    from biothings_explorer_test import APILocator
+    locator = APILocator()
+
+    source_apis = []
+
+    for source_id in sources:
+        prefix, identifier = source_id.split(':', 1)
+        source_apis.extend(locator.locate_apis_by_input_prefix_only(input_prefix=prefix.lower()))
+
+    if categories != None:
+        source_apis = [a for a in source_apis if a['object']['semantic_type'] in categories]
+
+    if relation != None:
+        source_apis = [a for a in source_apis if a['predicate'] == relation]
+
+    if targets != None:
+        target_prefixes = [t.split(':')[0].lower() for t in targets if ':' in t]
+        source_apis = [a for a in source_apis if a['object']['prefix'] in target_prefixes]
+
+    return source_apis
 
 def is_object(obj):
     """
