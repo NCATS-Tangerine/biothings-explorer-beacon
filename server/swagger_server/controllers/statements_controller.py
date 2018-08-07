@@ -24,7 +24,7 @@ def get_statement_details(statementId, keywords=None, size=None):  # noqa: E501
     return beacon_controller.get_statement_details(statementId, keywords, size)
 
 
-def get_statements(s, edge_label=None, relation=None, t=None, keywords=None, categories=None, size=None):  # noqa: E501
+def get_statements(s, edge_label=None, relation=None, t=None, keywords=None, categories=None, size=None, enforce_biolink_model=None, ignore_incomplete_data=None):  # noqa: E501
     """get_statements
 
     Given a specified set of [CURIE-encoded](https://www.w3.org/TR/curie/) source (&#39;s&#39;) concept identifiers,  retrieves a list of relationship statements where either the subject or object concept matches any of the input &#39;source&#39; concepts provided.  Optionally, a set of target (&#39;t&#39;) concept  identifiers may also be given, in which case a member of the &#39;target&#39; identifier set should match the concept opposing the &#39;source&#39; in the  statement, that is, if the&#39;source&#39; matches a subject, then the &#39;target&#39; should match the object of a given statement (or vice versa).  # noqa: E501
@@ -43,7 +43,11 @@ def get_statements(s, edge_label=None, relation=None, t=None, keywords=None, cat
     :type categories: List[str]
     :param size: maximum number of concept entries requested by the client; if this argument is omitted, then the query is expected to returned all  the available data for the query
     :type size: int
+    :param enforce_biolink_model: Filters out statements that contain predicates or categories that are not from the biolink model (https://biolink.github.io/biolink-model/).
+    :type enforce_biolink_model: bool
+    :param ignore_incomplete_data: Filters out statements that do not contain all the information.
+    :type ignore_incomplete_data: bool
 
     :rtype: List[BeaconStatement]
     """
-    return beacon_controller.get_statements(s, edge_label, relation, t, keywords, categories, size)
+    return beacon_controller.get_statements(s, edge_label, relation, t, keywords, categories, size, enforce_biolink_model, ignore_incomplete_data)
