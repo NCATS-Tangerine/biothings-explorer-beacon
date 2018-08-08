@@ -8,7 +8,6 @@ of those variable responses.
 """
 
 import requests
-from neomodel import NodeSet
 from typing import List
 
 
@@ -24,17 +23,21 @@ def lookup_category(prefix:str):
     """
     return _category_map.get(prefix.lower())
 
-def safe_get(d:dict, *vkeys):
-    if len(vkeys) < 1:
+def safe_get(d:dict, *vkeys) -> object:
+    """
+    Chains together multiple dict.get calls safely, returning None if they
+    cannot be performed.
+
+    >> d = {'x' : {'y' : 'z'}}
+    >> safe_get(d, 'x', 'y')
+    'z'
+    """
+    try:
+        for key in vkeys:
+            d = d.get(key)
+        return d
+    except:
         return None
-    elif len(vkeys) == 1:
-        return d.get(vkeys[0], None)
-    else:
-        value = d.get(vkeys[0])
-        if isinstance(value, dict):
-            return safe_get(value, *vkeys[1:])
-        else:
-            return None
 
 def get_apis(sources:List[str], targets:List[str]=None, relation:str=None, categories:List[str]=None):
     """
@@ -64,6 +67,7 @@ def get_apis(sources:List[str], targets:List[str]=None, relation:str=None, categ
 
     return source_apis
 
+# @deprecated
 def is_object(obj):
     """
     A json object will be an object if it has a:
@@ -88,29 +92,7 @@ def is_object(obj):
     else:
         return False
 
-# def collect_objects(obj, identifiers=('id', '_id')):
-#     """
-#     Recursively searches for the highest level json objects containing a given
-#     identifier as a key, and returns them all. This is intended to cut through
-#     extra metadata in json responses that do not contain identified objects.
-#
-#     Note: In the future should we require that identifiers not only be strings
-#           but also be curies? A number of the knowledge sources do not work with
-#           curies, though.
-#     """
-#     if isinstance(obj, (list, tuple, set)):
-#         generator = (collect_objects(item, identifiers) for item in obj)
-#         return [item for item in generator if item != None and item != []]
-#     elif isinstance(obj, dict):
-#         if any((key.lower() in identifiers) for key in obj.keys() if isinstance(key, str)):
-#             return obj
-#         else:
-#             for key, value in obj.items():
-#                 result = collect_objects(value, identifiers)
-#                 if result != None and result != []:
-#                     return result
-#     return []
-
+# @deprecated
 def collect_objects(obj, identifiers=('id', '_id')):
     """
     Recursively searches for the highest level json objects containing a given
@@ -134,6 +116,7 @@ def collect_objects(obj, identifiers=('id', '_id')):
                     return result
     return []
 
+# @deprecated
 def get_recursive(d, key, default=None):
     """
     Gets the value of the highest level key in a json structure.
@@ -156,14 +139,3 @@ def get_recursive(d, key, default=None):
                     return value
 
     return default
-
-def jsonify(e):
-    if isinstance(e, (list, set, tuple, NodeSet)):
-        return [jsonify(item) for item in e]
-    elif isinstance(e, dict):
-        return {k : jsonify(v) for k, v in e.items()}
-    else:
-        try:
-            return e.__properties__
-        except:
-            return e

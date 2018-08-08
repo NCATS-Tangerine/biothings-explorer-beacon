@@ -632,12 +632,28 @@ paths:
             type: string
         - name: size
           in: query
+          minimum: 1
           description: >
             maximum number of concept entries requested by the client; if this
             argument is omitted, then the query is expected to returned all  the
             available data for the query
           required: false
           type: integer
+        - name: enforce-biolink-model
+          in: query
+          required: false
+          type: boolean
+          default: true
+          description: >
+            Filters out statements that contain predicates or categories that
+            are not from the biolink model (https://biolink.github.io/biolink-model/).
+        - name: ignore-incomplete-data
+          in: query
+          required: false
+          type: boolean
+          default: false
+          description: >
+            Filters out statements that do not contain all the information.
       operationId: getStatements
       responses:
         '200':
@@ -880,3 +896,59 @@ paths:
                     hernia coincidence or concurrent etiology?
                   evidence_type: ECO_0000033
                   date: '2012-07-10T00:00:00.000Z'
+
+  '/update/{index}':
+    post:
+      description: >
+        Allows the user to annotate an identifier mapping with semantic data
+      tags:
+        - update
+      parameters:
+        - name: index
+          in: path
+          description: >
+            The index of the semantic query (http://biothings.io/explorer/api/v2/semanticquery?input_prefix={prefix}&output_prefix={prefix}&input_value={value}) to annotate
+          required: true
+          type: string
+        - name: input_prefix
+          in: query
+          required: true
+          type: string
+        - name: output_prefix
+          in: query
+          required: true
+          type: string
+        - name: input_value
+          in: query
+          required: false
+          type: string
+        - name: subject_category
+          in: query
+          required: false
+          type: string
+        - name: object_category
+          in: query
+          required: false
+          type: string
+        - name: predicate
+          in: query
+          required: false
+          type: string
+      operationId: update
+      responses:
+        '200':
+          schema:
+            type: object
+            properties:
+              apis:
+                type: array
+                items:
+                  type: object
+                description: >
+                  The array of biothings explorer API calls at the given index
+              example:
+                type: object
+                description: >
+                  The result of parsing the example input, if provided
+          description: |
+            Successful response with categories and frequency returned

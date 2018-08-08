@@ -11,7 +11,7 @@ info:
   license:
     name: "MIT License"
     url: "http://opensource.org/licenses/MIT"
-host: "rkb.ncats.io"
+# host: "rkb.ncats.io"
 basePath: "/"
 tags:
 - name: "metadata"
@@ -348,6 +348,20 @@ paths:
           \ the available data for the query\n"
         required: false
         type: "integer"
+        minimum: 1
+      - name: "enforce_biolink_model"
+        in: "query"
+        description: "Filters out statements that contain predicates or categories\
+          \ that are not from the biolink model (https://biolink.github.io/biolink-model/).\n"
+        required: false
+        type: "boolean"
+        default: true
+      - name: "ignore_incomplete_data"
+        in: "query"
+        description: "Filters out statements that do not contain all the information.\n"
+        required: false
+        type: "boolean"
+        default: false
       responses:
         200:
           description: "Successful response returns a list of concept-relations where\
@@ -429,6 +443,50 @@ paths:
                 evidence_type: "ECO_0000033"
                 date: "2012-07-10T00:00:00.000Z"
       x-swagger-router-controller: "swagger_server.controllers.statements_controller"
+  /update/{index}:
+    post:
+      tags:
+      - "update"
+      description: "Allows the user to annotate an identifier mapping with semantic\
+        \ data\n"
+      operationId: "update"
+      parameters:
+      - name: "index"
+        in: "path"
+        description: "The index of the semantic query (http://biothings.io/explorer/api/v2/semanticquery?input_prefix={prefix}&output_prefix={prefix}&input_value={value})\
+          \ to annotate\n"
+        required: true
+        type: "string"
+      - name: "input_prefix"
+        in: "query"
+        required: true
+        type: "string"
+      - name: "output_prefix"
+        in: "query"
+        required: true
+        type: "string"
+      - name: "input_value"
+        in: "query"
+        required: false
+        type: "string"
+      - name: "subject_category"
+        in: "query"
+        required: false
+        type: "string"
+      - name: "object_category"
+        in: "query"
+        required: false
+        type: "string"
+      - name: "predicate"
+        in: "query"
+        required: false
+        type: "string"
+      responses:
+        200:
+          description: "Successful response with categories and frequency returned\n"
+          schema:
+            $ref: "#/definitions/inline_response_200"
+      x-swagger-router-controller: "swagger_server.controllers.update_controller"
 definitions:
   BeaconStatement:
     properties:
@@ -694,6 +752,23 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/BeaconStatementCitation"
+  inline_response_200:
+    properties:
+      apis:
+        type: "array"
+        description: "The array of biothings explorer API calls at the given index\n"
+        items:
+          type: "object"
+          properties: {}
+      example:
+        type: "object"
+        description: "The result of parsing the example input, if provided\n"
+        properties: {}
+    example:
+      apis:
+      - "{}"
+      - "{}"
+      example: "{}"
   BeaconConceptWithDetails:
     properties:
       id:

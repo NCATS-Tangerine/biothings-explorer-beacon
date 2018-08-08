@@ -7,14 +7,9 @@ from swagger_server.models.beacon_statement_predicate import BeaconStatementPred
 from swagger_server.models.beacon_statement_subject import BeaconStatementSubject
 
 from beacon_controller import utils
-from beacon_controller.models import Association
 
 from typing import List
 from collections import defaultdict
-
-import json_parser
-
-from pprint import pprint
 
 from beacon_controller.utils import safe_get
 from beacon_controller import crawler
@@ -42,10 +37,7 @@ def perform_get_request(uri_pattern, identifier):
 
     return response, uri
 
-from biothings_explorer_test import fetch_output
-from pprint import pprint
-
-def get_statements(s, edge_label=None, relation=None, t=None, keywords=None, categories=None, size=None):
+def get_statements(s, edge_label=None, relation=None, t=None, keywords=None, categories=None, size=None, enforce_biolink_model=None, ignore_incomplete_data=None):  # noqa: E501
     statements = []
 
     for subject_id in s:
@@ -63,23 +55,35 @@ def get_statements(s, edge_label=None, relation=None, t=None, keywords=None, cat
 
                     if object_name != None:
                         subject_names.append(object_name)
-                        pprint(a)
 
                     else:
                         object_prefix, object_local_id = object_id.split(':', 1)
                         if 'name' in object_prefix.lower():
                             subject_names.append(object_local_id)
-                            pprint(a)
 
         predicate_longest_under_sixty = lambda n: (len(n) > 60, -len(n))
         subject_names.sort(key=predicate_longest_under_sixty)
 
         subject_name = None if len(subject_names) == 0 else subject_names[0]
 
+        prefix, _ = subject_id.split(':', 1)
         for category, associations in data.items():
+            if 'name' in prefix.lower() or 'description' in prefix.lower():
+                continue
+
             category = None if category == "null" else category
 
-            prefix, _ = subject_id.split(':', 1)
+            if object_name == None:
+                taxonomy = safe_get(a, 'object', 'taxonomy')
+                secondary_id = safe_get(a, 'object', 'secondary-id')
+                symbol = secondary_id.split(':', 1)[1] if secondary_id != None and ':' in secondary_id else None
+
+                if symbol != None:
+                    if taxonomy != None and len(taxonomy) >= 0:
+                        taxonomy = ', '.join(t for t in taxonomy if ':' not in t)
+                        object_name = '{} ({})'.format(taxonomy)
+                    else:
+                        object_name = symbol
 
             for a in associations:
                 beacon_subject = BeaconStatementSubject(
@@ -88,8 +92,15 @@ def get_statements(s, edge_label=None, relation=None, t=None, keywords=None, cat
                     category=utils.lookup_category(prefix)
                 )
 
+                object_id = safe_get(a, 'object', 'id')
+                if object_id != None and ':' in object_id:
+                    object_prefix, _ = object_id.split(':', 1)
+                    object_prefix = object_prefix.lower()
+                    if 'name' in object_prefix or 'description' in object_prefix:
+                        continue
+
                 beacon_object = BeaconStatementObject(
-                    id=safe_get(a, 'object', 'id'),
+                    id=object_id,
                     name=safe_get(a, 'object', 'label'),
                     category=category
                 )
@@ -97,6 +108,9 @@ def get_statements(s, edge_label=None, relation=None, t=None, keywords=None, cat
                 edge_label = safe_get(a, 'edge', 'label')
                 if edge_label == None:
                     edge_label = safe_get(a, 'predicate')
+                if edge_label == 'EquivalentAssociation':
+                    edge_label = 'same as'
+                edge_label = edge_label.replace(' ', '_')
 
                 beacon_predicate = BeaconStatementPredicate(
                     edge_label=edge_label,

@@ -1,7 +1,11 @@
 import requests
+import logging
 
 from typing import Dict, List
 from functools import lru_cache
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 _uri_pattern = 'http://biothings.io/explorer/api/v2/crawler?input_type={prefix}&input_value={local_id}'
 
@@ -22,4 +26,5 @@ def crawl(curie:str) -> Dict[str, List[dict]]:
         data = response.json()
         return data['linkedData']
     else:
+        logger.warn('{} returned error'.format(uri))
         return {}

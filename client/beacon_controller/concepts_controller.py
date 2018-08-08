@@ -2,10 +2,8 @@ from swagger_server.models.beacon_concept import BeaconConcept  # noqa: E501
 from swagger_server.models.beacon_concept_with_details import BeaconConceptWithDetails  # noqa: E501
 from swagger_server.models.exact_match_response import ExactMatchResponse  # noqa: E501
 
-from beacon_controller import utils, crawler
-from beacon_controller.utils import safe_get
-from beacon_controller.models import Association
-from beacon_controller import mychem_client
+from beacon_controller.utils import safe_get, lookup_category
+from beacon_controller import crawler
 
 import re, requests, yaml, json
 
@@ -44,7 +42,7 @@ def get_concept_details(conceptId):
         name=names[0] if len(names) >= 1 else None,
         synonyms=names[1:],
         exact_matches=xrefs,
-        category=utils.lookup_category(prefix),
+        category=lookup_category(prefix),
         description='; '.join(descriptions)
     )
 
@@ -67,7 +65,7 @@ def get_exact_matches_to_concept_list(c):
         for category, associations in data.items():
             for a in associations:
                 if a.get('predicate') == 'EquivalentAssociation':
-                    object_id = utils.safe_get(a, 'object', 'id')
+                    object_id = safe_get(a, 'object', 'id')
 
                     prefix, local_id = object_id.split(':', 1)
 
