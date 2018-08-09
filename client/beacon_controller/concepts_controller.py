@@ -22,9 +22,7 @@ def get_concept_details(conceptId):
                 object_id = safe_get(a, 'object', 'id')
                 prefix, local_id = object_id.split(':', 1)
 
-                print(prefix.lower())
-
-                if 'name' in prefix.lower():
+                if 'name' in prefix.lower() or 'symbol' in prefix.lower():
                     names.append(local_id)
                 if 'description' in prefix.lower():
                     descriptions.append(local_id)
