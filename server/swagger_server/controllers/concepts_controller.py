@@ -6,8 +6,6 @@ from swagger_server.models.beacon_concept_with_details import BeaconConceptWithD
 from swagger_server.models.exact_match_response import ExactMatchResponse  # noqa: E501
 from swagger_server import util
 
-import requests
-
 import beacon_controller
 
 def get_concept_details(conceptId):  # noqa: E501

@@ -18,10 +18,10 @@ REQUIRES = ["connexion"]
 setup(
     name=NAME,
     version=VERSION,
-    description="Translator Knowledge Beacon API",
+    description="Biothings Explorer Translator Knowledge Beacon API",
     author_email="richard@starinformatics.com",
     url="",
-    keywords=["Swagger", "Translator Knowledge Beacon API"],
+    keywords=["Swagger", "Biothings Explorer Translator Knowledge Beacon API"],
     install_requires=REQUIRES,
     packages=find_packages(),
     package_data={'': ['swagger/swagger.yaml']},
@@ -29,7 +29,7 @@ setup(
     entry_points={
         'console_scripts': ['swagger_server=swagger_server.__main__:main']},
     long_description="""\
-    This is the Translator Knowledge Beacon web service application programming interface (API). 
+    This is the Translator Knowledge Beacon web service application programming interface (API) wrapping Biothings Explorer (http://biothings.io/explorer/) 
     """
 )
 

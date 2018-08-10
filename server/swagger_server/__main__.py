@@ -13,7 +13,7 @@ def to_UI():
 
 def main():
     app.app.json_encoder = encoder.JSONEncoder
-    app.add_api('swagger.yaml', arguments={'title': 'Translator Knowledge Beacon API'})
+    app.add_api('swagger.yaml', arguments={'title': 'Biothings Explorer Translator Knowledge Beacon API'})
     app.run(port=8080)
 
 

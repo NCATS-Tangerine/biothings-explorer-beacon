@@ -16,7 +16,7 @@ class BeaconConceptWithDetails(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id: str=None, uri: str=None, name: str=None, symbol: str=None, category: str=None, description: str=None, synonyms: List[str]=None, exact_matches: List[str]=None, details: List[BeaconConceptDetail]=None):  # noqa: E501
+    def __init__(self, id: str=None, uri: str=None, name: str=None, symbol: str=None, categories: List[str]=None, description: str=None, synonyms: List[str]=None, exact_matches: List[str]=None, details: List[BeaconConceptDetail]=None):  # noqa: E501
         """BeaconConceptWithDetails - a model defined in Swagger
 
         :param id: The id of this BeaconConceptWithDetails.  # noqa: E501
@@ -27,8 +27,8 @@ class BeaconConceptWithDetails(Model):
         :type name: str
         :param symbol: The symbol of this BeaconConceptWithDetails.  # noqa: E501
         :type symbol: str
-        :param category: The category of this BeaconConceptWithDetails.  # noqa: E501
-        :type category: str
+        :param categories: The categories of this BeaconConceptWithDetails.  # noqa: E501
+        :type categories: List[str]
         :param description: The description of this BeaconConceptWithDetails.  # noqa: E501
         :type description: str
         :param synonyms: The synonyms of this BeaconConceptWithDetails.  # noqa: E501
@@ -43,7 +43,7 @@ class BeaconConceptWithDetails(Model):
             'uri': str,
             'name': str,
             'symbol': str,
-            'category': str,
+            'categories': List[str],
             'description': str,
             'synonyms': List[str],
             'exact_matches': List[str],
@@ -55,7 +55,7 @@ class BeaconConceptWithDetails(Model):
             'uri': 'uri',
             'name': 'name',
             'symbol': 'symbol',
-            'category': 'category',
+            'categories': 'categories',
             'description': 'description',
             'synonyms': 'synonyms',
             'exact_matches': 'exact_matches',
@@ -66,7 +66,7 @@ class BeaconConceptWithDetails(Model):
         self._uri = uri
         self._name = name
         self._symbol = symbol
-        self._category = category
+        self._categories = categories
         self._description = description
         self._synonyms = synonyms
         self._exact_matches = exact_matches
@@ -176,27 +176,27 @@ class BeaconConceptWithDetails(Model):
         self._symbol = symbol
 
     @property
-    def category(self) -> str:
-        """Gets the category of this BeaconConceptWithDetails.
+    def categories(self) -> List[str]:
+        """Gets the categories of this BeaconConceptWithDetails.
 
         concept semantic type 'category'. Should be specified from the [Biolink Model](https://biolink.github.io/biolink-model).   # noqa: E501
 
-        :return: The category of this BeaconConceptWithDetails.
-        :rtype: str
+        :return: The categories of this BeaconConceptWithDetails.
+        :rtype: List[str]
         """
-        return self._category
+        return self._categories
 
-    @category.setter
-    def category(self, category: str):
-        """Sets the category of this BeaconConceptWithDetails.
+    @categories.setter
+    def categories(self, categories: List[str]):
+        """Sets the categories of this BeaconConceptWithDetails.
 
         concept semantic type 'category'. Should be specified from the [Biolink Model](https://biolink.github.io/biolink-model).   # noqa: E501
 
-        :param category: The category of this BeaconConceptWithDetails.
-        :type category: str
+        :param categories: The categories of this BeaconConceptWithDetails.
+        :type categories: List[str]
         """
 
-        self._category = category
+        self._categories = categories
 
     @property
     def description(self) -> str:

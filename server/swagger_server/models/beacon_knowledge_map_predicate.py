@@ -15,26 +15,31 @@ class BeaconKnowledgeMapPredicate(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, edge_label: str=None, relation: str=None):  # noqa: E501
+    def __init__(self, edge_label: str=None, relation: str=None, negated: bool=None):  # noqa: E501
         """BeaconKnowledgeMapPredicate - a model defined in Swagger
 
         :param edge_label: The edge_label of this BeaconKnowledgeMapPredicate.  # noqa: E501
         :type edge_label: str
         :param relation: The relation of this BeaconKnowledgeMapPredicate.  # noqa: E501
         :type relation: str
+        :param negated: The negated of this BeaconKnowledgeMapPredicate.  # noqa: E501
+        :type negated: bool
         """
         self.swagger_types = {
             'edge_label': str,
-            'relation': str
+            'relation': str,
+            'negated': bool
         }
 
         self.attribute_map = {
             'edge_label': 'edge_label',
-            'relation': 'relation'
+            'relation': 'relation',
+            'negated': 'negated'
         }
 
         self._edge_label = edge_label
         self._relation = relation
+        self._negated = negated
 
     @classmethod
     def from_dict(cls, dikt) -> 'BeaconKnowledgeMapPredicate':
@@ -92,3 +97,26 @@ class BeaconKnowledgeMapPredicate(Model):
         """
 
         self._relation = relation
+
+    @property
+    def negated(self) -> bool:
+        """Gets the negated of this BeaconKnowledgeMapPredicate.
+
+        Indicates whether edge statement is negated (i.e. is not true)   # noqa: E501
+
+        :return: The negated of this BeaconKnowledgeMapPredicate.
+        :rtype: bool
+        """
+        return self._negated
+
+    @negated.setter
+    def negated(self, negated: bool):
+        """Sets the negated of this BeaconKnowledgeMapPredicate.
+
+        Indicates whether edge statement is negated (i.e. is not true)   # noqa: E501
+
+        :param negated: The negated of this BeaconKnowledgeMapPredicate.
+        :type negated: bool
+        """
+
+        self._negated = negated

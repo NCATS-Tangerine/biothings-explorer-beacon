@@ -2,16 +2,16 @@
 swagger: "2.0"
 info:
   description: "This is the Translator Knowledge Beacon web service application programming\
-    \ interface (API).\n"
-  version: "1.1.0"
-  title: "Translator Knowledge Beacon API"
+    \ interface (API) wrapping Biothings Explorer (http://biothings.io/explorer/)\n"
+  version: "1.1.1"
+  title: "Biothings Explorer Translator Knowledge Beacon API"
   contact:
     url: "http://starinformatics.com"
     email: "richard@starinformatics.com"
   license:
     name: "MIT License"
     url: "http://opensource.org/licenses/MIT"
-# host: "rkb.ncats.io"
+host: "kba-staging.ncats.io"
 basePath: "/"
 tags:
 - name: "metadata"
@@ -32,7 +32,8 @@ paths:
       description: "Get a list of concept categories and number of their concept instances\
         \ documented by the knowledge source. These types should be mapped onto the\
         \ Translator-endorsed Biolink Model concept type classes with local types,\
-        \ explicitly added as mappings to the Biolink Model YAML file.\n"
+        \ explicitly added as mappings to the Biolink Model YAML file. A frequency\
+        \ of -1 indicates the category can exist, but the count is unknown.\n"
       operationId: "get_concept_categories"
       parameters: []
       responses:
@@ -107,7 +108,9 @@ paths:
                 - "CHEMBL"
                 - "UNIPROT"
               predicate:
+                edge_label: "gene_associated_with_condition"
                 relation: "gene_associated_with_condition"
+                negated: false
               object:
                 category: "disease or phenotypic feature"
                 prefixes:
@@ -167,7 +170,8 @@ paths:
             application/json:
             - id: "wd:Q6591532"
               name: "WRN protein, human"
-              category: "protein"
+              categories:
+              - "protein"
               description: "Werner syndrome ATP-dependent helicase (1432 aa, ~162\
                 \ kDa) is encoded by the human WRN gene. This protein plays a role\
                 \ in both magnesium and ATP-dependent DNA-helicase activity and 3\\\
@@ -197,7 +201,8 @@ paths:
             application/json:
             - id: "wd:Q6591532"
               name: "WRN protein, human"
-              category: "protein"
+              categories:
+              - "protein"
               symbol: "WRN"
               synonyms:
               - "RecQ3"
@@ -348,20 +353,6 @@ paths:
           \ the available data for the query\n"
         required: false
         type: "integer"
-        minimum: 1
-      - name: "enforce_biolink_model"
-        in: "query"
-        description: "Filters out statements that contain predicates or categories\
-          \ that are not from the biolink model (https://biolink.github.io/biolink-model/).\n"
-        required: false
-        type: "boolean"
-        default: true
-      - name: "ignore_incomplete_data"
-        in: "query"
-        description: "Filters out statements that do not contain all the information.\n"
-        required: false
-        type: "boolean"
-        default: false
       responses:
         200:
           description: "Successful response returns a list of concept-relations where\
@@ -379,7 +370,8 @@ paths:
                 id:
                 - "wd:Q14912054"
                 name: "KCNJ11"
-                category: "gene"
+                categories:
+                - "gene"
               predicate:
                 edge_label: "has_phenotype"
                 relation: "RO:0002200"
@@ -388,7 +380,8 @@ paths:
                 id:
                 - "wd:Q2898645"
                 name: "Neonatal diabetes mellitus"
-                category: "disease"
+                categories:
+                - "disease"
       x-swagger-router-controller: "swagger_server.controllers.statements_controller"
   /statements/{statementId}:
     get:
@@ -443,58 +436,9 @@ paths:
                 evidence_type: "ECO_0000033"
                 date: "2012-07-10T00:00:00.000Z"
       x-swagger-router-controller: "swagger_server.controllers.statements_controller"
-  /update/{index}:
-    post:
-      tags:
-      - "update"
-      description: "Allows the user to annotate an identifier mapping with semantic\
-        \ data\n"
-      operationId: "update"
-      parameters:
-      - name: "index"
-        in: "path"
-        description: "The index of the semantic query (http://biothings.io/explorer/api/v2/semanticquery?input_prefix={prefix}&output_prefix={prefix}&input_value={value})\
-          \ to annotate\n"
-        required: true
-        type: "string"
-      - name: "input_prefix"
-        in: "query"
-        required: true
-        type: "string"
-      - name: "output_prefix"
-        in: "query"
-        required: true
-        type: "string"
-      - name: "input_value"
-        in: "query"
-        required: false
-        type: "string"
-      - name: "subject_category"
-        in: "query"
-        required: false
-        type: "string"
-      - name: "object_category"
-        in: "query"
-        required: false
-        type: "string"
-      - name: "predicate"
-        in: "query"
-        required: false
-        type: "string"
-      responses:
-        200:
-          description: "Successful response with categories and frequency returned\n"
-          schema:
-            $ref: "#/definitions/inline_response_200"
-      x-swagger-router-controller: "swagger_server.controllers.update_controller"
 definitions:
   BeaconStatement:
     properties:
-      source:
-        type: "string"
-        description: "The URI endpoint or knowledge source that this statement was\
-          \ taken from. This is useful for beacon instances that report data from\
-          \ multiple sources."
       id:
         type: "string"
         description: "CURIE-encoded identifier for statement (can be used to retrieve\
@@ -516,6 +460,9 @@ definitions:
         type: "string"
         description: "Human readable name of a 'maximal' Biolink Model or beacon-specific\
           \ (or Reasoner-specific) predicate relationship name.\n"
+      negated:
+        type: "boolean"
+        description: "Indicates whether edge statement is negated (i.e. is not true)\n"
   BeaconStatementCitation:
     properties:
       id:
@@ -581,10 +528,12 @@ definitions:
       name:
         type: "string"
         description: "canonical human readable name of the concept\n"
-      category:
-        type: "string"
+      categories:
+        type: "array"
         description: "concept semantic type 'category'. Should be specified from the\n\
           [Biolink Model](https://biolink.github.io/biolink-model).\n"
+        items:
+          type: "string"
       description:
         type: "string"
         description: "(optional) narrative concept definition\n"
@@ -660,11 +609,13 @@ definitions:
       name:
         type: "string"
         description: "human readable label of subject concept"
-      category:
-        type: "string"
+      categories:
+        type: "array"
         description: "a semantic group for the subject concept (specified as a code\
           \ gene, pathway, disease, etc. - see [Biolink Model](https://biolink.github.io/biolink-model)\
           \ for the full list of categories)\n"
+        items:
+          type: "string"
   BeaconConceptCategory:
     properties:
       id:
@@ -752,23 +703,6 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/BeaconStatementCitation"
-  inline_response_200:
-    properties:
-      apis:
-        type: "array"
-        description: "The array of biothings explorer API calls at the given index\n"
-        items:
-          type: "object"
-          properties: {}
-      example:
-        type: "object"
-        description: "The result of parsing the example input, if provided\n"
-        properties: {}
-    example:
-      apis:
-      - "{}"
-      - "{}"
-      example: "{}"
   BeaconConceptWithDetails:
     properties:
       id:
@@ -784,10 +718,12 @@ definitions:
       symbol:
         type: "string"
         description: "(optional) symbol, used for genomic data\n"
-      category:
-        type: "string"
+      categories:
+        type: "array"
         description: "concept semantic type 'category'. Should be specified from the\n\
           [Biolink Model](https://biolink.github.io/biolink-model).\n"
+        items:
+          type: "string"
       description:
         type: "string"
         description: "(optional) narrative concept definition\n"
@@ -825,8 +761,10 @@ definitions:
       name:
         type: "string"
         description: "human readable label of object concept"
-      category:
-        type: "string"
+      categories:
+        type: "array"
         description: "a semantic group for the object concept (specified as a code\
           \ gene, pathway, disease, etc. - see [Biolink Model](https://biolink.github.io/biolink-model)\
           \ for the full list of categories)\n"
+        items:
+          type: "string"

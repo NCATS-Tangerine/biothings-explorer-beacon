@@ -18,11 +18,9 @@ class BeaconStatement(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, source: str=None, id: str=None, subject: BeaconStatementSubject=None, predicate: BeaconStatementPredicate=None, object: BeaconStatementObject=None):  # noqa: E501
+    def __init__(self, id: str=None, subject: BeaconStatementSubject=None, predicate: BeaconStatementPredicate=None, object: BeaconStatementObject=None):  # noqa: E501
         """BeaconStatement - a model defined in Swagger
 
-        :param source: The source of this BeaconStatement.  # noqa: E501
-        :type source: str
         :param id: The id of this BeaconStatement.  # noqa: E501
         :type id: str
         :param subject: The subject of this BeaconStatement.  # noqa: E501
@@ -33,7 +31,6 @@ class BeaconStatement(Model):
         :type object: BeaconStatementObject
         """
         self.swagger_types = {
-            'source': str,
             'id': str,
             'subject': BeaconStatementSubject,
             'predicate': BeaconStatementPredicate,
@@ -41,14 +38,12 @@ class BeaconStatement(Model):
         }
 
         self.attribute_map = {
-            'source': 'source',
             'id': 'id',
             'subject': 'subject',
             'predicate': 'predicate',
             'object': 'object'
         }
 
-        self._source = source
         self._id = id
         self._subject = subject
         self._predicate = predicate
@@ -64,29 +59,6 @@ class BeaconStatement(Model):
         :rtype: BeaconStatement
         """
         return util.deserialize_model(dikt, cls)
-
-    @property
-    def source(self) -> str:
-        """Gets the source of this BeaconStatement.
-
-        The URI endpoint or knowledge source that this statement was taken from. This is useful for beacon instances that report data from multiple sources.  # noqa: E501
-
-        :return: The source of this BeaconStatement.
-        :rtype: str
-        """
-        return self._source
-
-    @source.setter
-    def source(self, source: str):
-        """Sets the source of this BeaconStatement.
-
-        The URI endpoint or knowledge source that this statement was taken from. This is useful for beacon instances that report data from multiple sources.  # noqa: E501
-
-        :param source: The source of this BeaconStatement.
-        :type source: str
-        """
-
-        self._source = source
 
     @property
     def id(self) -> str:
