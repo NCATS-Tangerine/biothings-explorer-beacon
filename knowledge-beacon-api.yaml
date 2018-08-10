@@ -1,17 +1,17 @@
 swagger: '2.0'
 info:
-  title: Translator Knowledge Beacon API
-  version: 1.1.0
+  title: Biothings Explorer Translator Knowledge Beacon API
+  version: 1.1.1
   contact:
     url: 'http://starinformatics.com'
     email: richard@starinformatics.com
   description: >
     This is the Translator Knowledge Beacon web service application programming
-    interface (API).
+    interface (API) wrapping Biothings Explorer (http://biothings.io/explorer/)
   license:
     name: MIT License
     url: 'http://opensource.org/licenses/MIT'
-host: rkb.ncats.io
+host: kba-staging.ncats.io
 basePath: /
 schemes:
   - https
@@ -31,7 +31,9 @@ paths:
         Get a list of concept categories and number of their concept instances
         documented by the knowledge source. These types should be mapped onto
         the Translator-endorsed Biolink Model concept type classes with local
-        types, explicitly added as mappings to the Biolink Model YAML file.
+        types, explicitly added as mappings to the Biolink Model YAML file. A
+        frequency of -1 indicates the category can exist, but the count is
+        unknown.
       tags:
         - metadata
       operationId: getConceptCategories
@@ -224,6 +226,11 @@ paths:
                         Human readable name of a 'maximal' Biolink Model or
                         beacon-specific (or Reasoner-specific) predicate
                         relationship name.
+                    negated:
+                      type: boolean
+                      description: >
+                        Indicates whether edge statement is negated (i.e. is not
+                        true)
                 object:
                   title: BeaconKnowledgeMapObject
                   type: object
@@ -267,7 +274,9 @@ paths:
                     - CHEMBL
                     - UNIPROT
                 predicate:
+                  edge_label: gene_associated_with_condition
                   relation: gene_associated_with_condition
+                  negated: false
                 object:
                   category: disease or phenotypic feature
                   prefixes:
@@ -342,8 +351,10 @@ paths:
                   type: string
                   description: |
                     canonical human readable name of the concept
-                category:
-                  type: string
+                categories:
+                  type: array
+                  items:
+                    type: string
                   description: >
                     concept semantic type 'category'. Should be specified from
                     the
@@ -359,7 +370,8 @@ paths:
             application/json:
               - id: 'wd:Q6591532'
                 name: 'WRN protein, human'
-                category: protein
+                categories:
+                  - protein
                 description: >-
                   Werner syndrome ATP-dependent helicase (1432 aa, ~162 kDa) is
                   encoded by the human WRN gene. This protein plays a role in
@@ -404,8 +416,10 @@ paths:
                 type: string
                 description: |
                   (optional) symbol, used for genomic data
-              category:
-                type: string
+              categories:
+                type: array
+                items:
+                  type: string
                 description: |
                   concept semantic type 'category'. Should be specified from the
                   [Biolink Model](https://biolink.github.io/biolink-model).
@@ -451,7 +465,8 @@ paths:
             application/json:
               - id: 'wd:Q6591532'
                 name: 'WRN protein, human'
-                category: protein
+                categories:
+                  - protein
                 symbol: WRN
                 synonyms:
                   - RecQ3
@@ -632,28 +647,12 @@ paths:
             type: string
         - name: size
           in: query
-          minimum: 1
           description: >
             maximum number of concept entries requested by the client; if this
             argument is omitted, then the query is expected to returned all  the
             available data for the query
           required: false
           type: integer
-        - name: enforce-biolink-model
-          in: query
-          required: false
-          type: boolean
-          default: true
-          description: >
-            Filters out statements that contain predicates or categories that
-            are not from the biolink model (https://biolink.github.io/biolink-model/).
-        - name: ignore-incomplete-data
-          in: query
-          required: false
-          type: boolean
-          default: false
-          description: >
-            Filters out statements that do not contain all the information.
       operationId: getStatements
       responses:
         '200':
@@ -667,12 +666,6 @@ paths:
               title: BeaconStatement
               type: object
               properties:
-                source:
-                  type: string
-                  description: >-
-                    The URI endpoint or knowledge source that this statement was
-                    taken from. This is useful for beacon instances that report
-                    data from multiple sources.
                 id:
                   type: string
                   description: >-
@@ -689,8 +682,10 @@ paths:
                     name:
                       type: string
                       description: human readable label of subject concept
-                    category:
-                      type: string
+                    categories:
+                      type: array
+                      items:
+                        type: string
                       description: >
                         a semantic group for the subject concept (specified as a
                         code gene, pathway, disease, etc. - see [Biolink
@@ -736,8 +731,10 @@ paths:
                     name:
                       type: string
                       description: human readable label of object concept
-                    category:
-                      type: string
+                    categories:
+                      type: array
+                      items:
+                        type: string
                       description: >
                         a semantic group for the object concept (specified as a
                         code gene, pathway, disease, etc. - see [Biolink
@@ -751,7 +748,8 @@ paths:
                   id:
                     - 'wd:Q14912054'
                   name: KCNJ11
-                  category: gene
+                  categories:
+                    - gene
                 predicate:
                   edge_label: has_phenotype
                   relation: 'RO:0002200'
@@ -760,7 +758,8 @@ paths:
                   id:
                     - 'wd:Q2898645'
                   name: Neonatal diabetes mellitus
-                  category: disease
+                  categories:
+                    - disease
   '/statements/{statementId}':
     get:
       description: >
@@ -896,59 +895,3 @@ paths:
                     hernia coincidence or concurrent etiology?
                   evidence_type: ECO_0000033
                   date: '2012-07-10T00:00:00.000Z'
-
-  '/update/{index}':
-    post:
-      description: >
-        Allows the user to annotate an identifier mapping with semantic data
-      tags:
-        - update
-      parameters:
-        - name: index
-          in: path
-          description: >
-            The index of the semantic query (http://biothings.io/explorer/api/v2/semanticquery?input_prefix={prefix}&output_prefix={prefix}&input_value={value}) to annotate
-          required: true
-          type: string
-        - name: input_prefix
-          in: query
-          required: true
-          type: string
-        - name: output_prefix
-          in: query
-          required: true
-          type: string
-        - name: input_value
-          in: query
-          required: false
-          type: string
-        - name: subject_category
-          in: query
-          required: false
-          type: string
-        - name: object_category
-          in: query
-          required: false
-          type: string
-        - name: predicate
-          in: query
-          required: false
-          type: string
-      operationId: update
-      responses:
-        '200':
-          schema:
-            type: object
-            properties:
-              apis:
-                type: array
-                items:
-                  type: object
-                description: >
-                  The array of biothings explorer API calls at the given index
-              example:
-                type: object
-                description: >
-                  The result of parsing the example input, if provided
-          description: |
-            Successful response with categories and frequency returned
