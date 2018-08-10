@@ -3,6 +3,11 @@ install:
 	pip install client/
 	pip install server/
 
+dev-install:
+	pip install --no-cache-dir -r requirements.txt
+	pip install -e client/
+	pip install server/
+
 run:
 	cd server
 	python -m swagger_server
