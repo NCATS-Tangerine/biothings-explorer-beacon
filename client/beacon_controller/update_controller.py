@@ -1,8 +1,5 @@
 import requests
 
-from swagger_server.models.update_response import UpdateResponse
-from swagger_server.models.inline_response200 import InlineResponse200
-
 from swagger_server.models.beacon_statement import BeaconStatement
 from swagger_server.models.beacon_statement_with_details import BeaconStatementWithDetails
 from swagger_server.models.beacon_statement_object import BeaconStatementObject

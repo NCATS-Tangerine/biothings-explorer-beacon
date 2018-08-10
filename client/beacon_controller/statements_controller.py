@@ -72,12 +72,12 @@ def build_statement(
     beacon_subject = BeaconStatementSubject(
         id=subject_id,
         name=subject_name,
-        category=subject_category
+        categories=[subject_category]
     )
     beacon_object = BeaconStatementObject(
         id=object_id,
         name=object_name,
-        category=object_category
+        categories=[object_category]
     )
     beacon_predicate = BeaconStatementPredicate(
         edge_label=predicate_name,
@@ -86,7 +86,6 @@ def build_statement(
     )
     return BeaconStatement(
         id=None,
-        source=None,
         subject=beacon_subject,
         predicate=beacon_predicate,
         object=beacon_object

@@ -40,7 +40,7 @@ def get_concept_details(conceptId):
         name=names[0] if len(names) >= 1 else None,
         synonyms=names[1:],
         exact_matches=xrefs,
-        category=lookup_category(prefix),
+        categories=[lookup_category(prefix)],
         description='; '.join(descriptions)
     )
 
