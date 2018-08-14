@@ -9,18 +9,30 @@ of those variable responses.
 
 import requests
 from typing import List
+from flask import abort
 
+bioentities_endpoint = 'http://biothings.io/explorer/api/v2/metadata/bioentities'
 
-_response = requests.get('http://biothings.io/explorer/api/v2/metadata/bioentities').json()
-_category_map = {}
-for category, prefixes in _response['bioentity'].items():
-    for prefix in prefixes:
-        _category_map[prefix] = category
+_category_map = None
 
-def lookup_category(prefix:str):
+def lookup_category(prefix:str) -> str:
     """
     Returns the category that this prefix belongs to
     """
+    global _category_map
+
+    if _category_map == None:
+        response = requests.get(bioentities_endpoint)
+
+        if response.ok:
+            _category_map = {}
+            data = response.json()
+            for category, prefixes in data['bioentity'].items():
+                for prefix in prefixes:
+                    _category_map[prefix.lower()] = category
+        else:
+            abort(500, 'Could not connect to: {}'.format(bioentities_endpoint))
+
     return _category_map.get(prefix.lower())
 
 def safe_get(d:dict, *vkeys) -> object:

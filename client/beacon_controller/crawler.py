@@ -26,5 +26,4 @@ def crawl(curie:str) -> Dict[str, List[dict]]:
         data = response.json()
         return data['linkedData']
     else:
-        logger.warn('{} returned error'.format(uri))
-        return {}
+        abort(500, detail='Could not connect to: {}'.format(uri))
