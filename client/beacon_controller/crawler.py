@@ -4,6 +4,8 @@ import logging
 from typing import Dict, List
 from functools import lru_cache
 
+from flask import abort
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
