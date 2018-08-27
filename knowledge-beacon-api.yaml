@@ -11,7 +11,7 @@ info:
   license:
     name: MIT License
     url: 'http://opensource.org/licenses/MIT'
-host: kba-staging.ncats.io
+host: biothings-beacon.ncats.io
 basePath: /
 schemes:
   - https
@@ -79,16 +79,10 @@ paths:
             Successful response with categories and frequency returned
           examples:
             application/json:
-              - id: 'biolink:CellularComponent'
-                uri: 'http://bioentity.io/vocab/CellularComponent'
-                category: cellular component
-                local_id: 'GO:0005575'
-                local_uri: 'http://amigo.geneontology.org/amigo/term/GO:0005575'
-                local_category: cellular_component
-                description: |
-                  The part of a cell, extracellular environment or virus in
-                  which a gene product is located.
-                frequency: 12355
+              - category: gene
+              - category: taxonomy
+              - category: bioassay
+
   /predicates:
     get:
       description: >
@@ -162,17 +156,8 @@ paths:
             indexed by beacons which support the relation
           examples:
             application/json:
-              - id: 'biolink:has_phenotype'
-                uri: 'http://bioentity.io/vocab/has_phenotype'
-                edge_label: has_phenotype
-                relation: 'RO:001279'
-                local_id: 'SIO:000983'
-                local_uri: 'http://semanticscience.org/resource/SIO_001279'
-                local_relation: has phenotype
-                description: |
-                  has phenotype is a relation between an object and an
-                  observable/measurable characteristic
-                frequency: 1234
+              - relation: PhenotypeToDiseaseAssociation
+              - edge_label: treats
   /kmap:
     get:
       description: >
@@ -268,28 +253,22 @@ paths:
           examples:
             application/json:
               - subject:
-                  category: gene
+                  category: phenotype
                   prefixes:
-                    - DRUGBANK
-                    - CHEMBL
-                    - UNIPROT
+                    - hp
                 predicate:
-                  edge_label: gene_associated_with_condition
-                  relation: gene_associated_with_condition
+                  relation: DiseaseToPhenotypicFeatureAssociation
                   negated: false
                 object:
-                  category: disease or phenotypic feature
+                  category: disease
                   prefixes:
-                    - MP
-                    - HP
-                    - DOID
-                count: 500
-                description: >
-                  a gene that is capable of some activity that affects the
-                  magnitude or nature of a pathological process, phenotype or
-                  disease
+                    - "orphanet"
+                    - "doid"
+                    - "omim.disease"
+                    - "mondo"
   /concepts:
     get:
+      deprecated: true
       description: |
         Retrieves a list of whose concept in the
         beacon knowledge base with names and/or synonyms
@@ -463,37 +442,20 @@ paths:
             Successful response with concept details returned
           examples:
             application/json:
-              - id: 'wd:Q6591532'
-                name: 'WRN protein, human'
+              - id: 'hgnc.symbol:WRN'
+                name: 'WRN'
                 categories:
-                  - protein
-                symbol: WRN
-                synonyms:
-                  - RecQ3
-                  - Werner Syndrome ATP-Dependent Helicase
-                  - 'RECQL2 protein, human'
-                  - EC 3.1.-.-
-                  - 'WRN protein, human'
-                  - WRN
-                  - Exonuclease WRN
-                  - Werner Syndrome Protein
-                  - RecQ Protein-Like 2
-                  - EC 3.6.4.12
-                  - 'RECQ3 protein, human'
-                  - 'Werner syndrome helicase, human'
-                  - WRN Protein
-                  - 'DNA Helicase, RecQ-Like Type 3'
+                  - gene
                 description: >-
-                  Werner syndrome ATP-dependent helicase (1432 aa, ~162 kDa) is
-                  encoded by the human WRN gene. This protein plays a role in
-                  both magnesium and ATP-dependent DNA-helicase activity and
-                  3\'->5\' exonuclease activity towards double-stranded DNA with
-                  a 5\'-overhang.
-                details:
-                  - tag: taxon
-                    value: '9606'
-                  - tag: phenotype
-                    value: progeria
+                  This gene encodes a member of the RecQ subfamily of DNA helicase proteins. The encoded nuclear protein is important in the maintenance of genome stability and plays a role in DNA repair, replication, transcription and telomere maintenance. This protein contains a N-terminal 3' to 5' exonuclease domain, an ATP-dependent helicase domain and RQC (RecQ helicase conserved region) domain in its central region, and a C-terminal HRDC (helicase RNase D C-terminal) domain and nuclear localization signal. Defects in this gene are the cause of Werner syndrome, an autosomal recessive disorder characterized by accelerated aging and an elevated risk for certain cancers. [provided by RefSeq, Aug 2017].
+                exactmatches:
+                  - "OMIM.GENE:604611"
+                  - "HGNC.SYMBOL:WRN"
+                  - "HGNC:12791"
+                  - "UMLS.GENE:C1337007"
+                  - "ENSEMBL.GENE:ENSG00000165392"
+                  - "PHAROS.TARGET:14264"
+                synonyms: []
   /exactmatches:
     get:
       description: >
@@ -562,8 +524,11 @@ paths:
                     type: string
           examples:
             application/json:
-              - 'wd:Q14883734'
-              - 'NCBIGene:7486'
+              - id: "MONDO:0014458"
+                within_domain: True
+                has_exact_matches:
+                  - "OMIM.DISEASE:616026"
+                  - "UMLS.DISEASE:C4014962"
   /statements:
     get:
       description: >
@@ -743,21 +708,19 @@ paths:
           examples:
             application/json:
               - source: semmeddb
-                id: 'kb:12345'
+                id: 'MONDO:0018911:DiseaseOntologyToChildDiseaseOntologyAssociation:DOID:0111108'
                 subject:
                   id:
-                    - 'wd:Q14912054'
-                  name: KCNJ11
+                    - 'MONDO:0018911'
+                  name: maturity-onset diabetes of the young (disease)
                   categories:
-                    - gene
+                    - disease
                 predicate:
-                  edge_label: has_phenotype
-                  relation: 'RO:0002200'
-                  negated: false
+                  edge_label: DiseaseOntologyToChildDiseaseOntologyAssociation
                 object:
                   id:
-                    - 'wd:Q2898645'
-                  name: Neonatal diabetes mellitus
+                    - 'DOID:0111108'
+                  name: maturity-onset diabetes of the young type 10
                   categories:
                     - disease
   '/statements/{statementId}':
@@ -880,18 +843,13 @@ paths:
             successful call with statement details returned
           examples:
             application/json:
-              id: 'kb:12345'
-              is_defined_by: 'http://starinformatics.com'
-              provided_by: 'https://skr3.nlm.nih.gov/SemMedDB/'
+              is_defined_by: "BioLink API"
+              provided_by: "hpoa.ttl"
               qualifiers: []
               annotation:
-                - tag: stage
-                  value: neo-natal
-              evidence:
-                - id: 'PMID:22781086'
-                  uri: 'https://www.ncbi.nlm.nih.gov/pubmed/?term=22781086'
-                  name: >-
-                    Neonatal diabetes mellitus and congenital diaphragmatic
-                    hernia coincidence or concurrent etiology?
-                  evidence_type: ECO_0000033
-                  date: '2012-07-10T00:00:00.000Z'
+                - tag: predicate
+                  value: DiseaseToPhenotypicFeatureAssociation
+                - tag: endpoint
+                  value: https://api.monarchinitiative.org/api/bioentity/disease/{diseaseid}/phenotypes
+                - tag: endpoint_input
+                  value: "MONDO:0018911"
