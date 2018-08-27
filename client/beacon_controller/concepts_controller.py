@@ -2,7 +2,7 @@ from swagger_server.models.beacon_concept import BeaconConcept  # noqa: E501
 from swagger_server.models.beacon_concept_with_details import BeaconConceptWithDetails  # noqa: E501
 from swagger_server.models.exact_match_response import ExactMatchResponse  # noqa: E501
 
-from beacon_controller.utils import safe_get, lookup_category
+from beacon_controller.utils import safe_get, lookup_category, simplify_curie
 from beacon_controller import crawler
 
 import re, requests, yaml, json
@@ -27,7 +27,7 @@ def get_concept_details(conceptId):
                 if 'description' in prefix.lower():
                     descriptions.append(local_id)
                 if not 'name' in prefix.lower() and not 'description' in prefix.lower():
-                    xrefs.append(object_id)
+                    xrefs.append(simplify_curie(object_id))
 
     names = list(set(names))
     predicate_longest_under_sixty = lambda n: (len(n) > 60, -len(n))
@@ -68,7 +68,7 @@ def get_exact_matches_to_concept_list(c):
                     prefix, local_id = object_id.split(':', 1)
 
                     if 'name' not in prefix.lower():
-                        exact_matches.append(object_id)
+                        exact_matches.append(simplify_curie(object_id))
 
         response.append(ExactMatchResponse(
             id=curie,

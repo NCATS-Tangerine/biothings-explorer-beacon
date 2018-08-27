@@ -12,7 +12,7 @@ from beacon_controller import utils
 from typing import List
 from collections import defaultdict
 
-from beacon_controller.utils import safe_get
+from beacon_controller.utils import safe_get, simplify_curie
 from beacon_controller import crawler
 
 def get_statement_details(statementId, keywords=None, size=None):
@@ -180,19 +180,6 @@ def remove_duplicates(l:list):
     but do not implement _hash_. For such cases l = list(set(l)) wont work.
     """
     return [obj for index, obj in enumerate(l) if obj not in l[index + 1:]]
-
-def simplify_curie(curie:str) -> str:
-    """
-    Ensures that there are no duplicate components in the curie. Biothings
-    explorer has a bug where curies appear like: HP:HP:0001959, when it should
-    just be HP:0001959.
-    """
-    if curie is None:
-        return None
-    else:
-        components = curie.split(':')
-        unique_components = [c for i, c in enumerate(components) if c not in components[:i]]
-        return ':'.join(unique_components)
 
 def get_statements(s, edge_label=None, relation=None, t=None, keywords=None, categories=None, size=None, enforce_biolink_model=None, ignore_incomplete_data=None):  # noqa: E501
     statements = []

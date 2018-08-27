@@ -35,6 +35,19 @@ def lookup_category(prefix:str) -> str:
 
     return _category_map.get(prefix.lower())
 
+def simplify_curie(curie:str) -> str:
+    """
+    Ensures that there are no duplicate components in the curie. Biothings
+    explorer has a bug where curies appear like: HP:HP:0001959, when it should
+    just be HP:0001959.
+    """
+    if curie is None:
+        return None
+    else:
+        components = curie.split(':')
+        unique_components = [c for i, c in enumerate(components) if c not in components[:i]]
+        return ':'.join(unique_components)
+
 def safe_get(d:dict, *vkeys) -> object:
     """
     Chains together multiple dict.get calls safely, returning None if they
