@@ -1,4 +1,7 @@
 # biothings-explorer-beacon
+
+Hosted at https://biothings-beacon.ncats.io/ui/
+
 Instructions to run in a virtual environment:
 ```
 virtualenv -p python3.5 venv
