@@ -4,6 +4,8 @@ import logging
 from typing import Dict, List
 from functools import lru_cache
 
+from flask import abort
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -26,4 +28,4 @@ def crawl(curie:str) -> Dict[str, List[dict]]:
         data = response.json()
         return data['linkedData']
     else:
-        abort(500, detail='Could not connect to: {}'.format(uri))
+        abort(500, 'Could not connect to: {}'.format(uri))
