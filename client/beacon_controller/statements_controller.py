@@ -2,6 +2,7 @@ import re, requests, yaml, json
 
 from swagger_server.models.beacon_statement import BeaconStatement
 from swagger_server.models.beacon_statement_with_details import BeaconStatementWithDetails
+from swagger_server.models.beacon_statement_annotation import BeaconStatementAnnotation
 from swagger_server.models.beacon_statement_object import BeaconStatementObject
 from swagger_server.models.beacon_statement_predicate import BeaconStatementPredicate
 from swagger_server.models.beacon_statement_subject import BeaconStatementSubject
@@ -15,6 +16,55 @@ from beacon_controller.utils import safe_get
 from beacon_controller import crawler
 
 def get_statement_details(statementId, keywords=None, size=None):
+    if ':' not in statementId:
+        return BeaconStatementWithDetails()
+
+    p = statementId.split(':')
+
+    if len(p) != 5:
+        return BeaconStatementWithDetails()
+
+    subject_id = '{}:{}'.format(p[0], p[1])
+    predicate = '{}'.format(p[2])
+    object_id = '{}:{}'.format(p[3], p[4])
+
+    data = crawler.crawl(subject_id)
+
+    for category, assocations in data.items():
+        for a in assocations:
+            object_match = object_id == simplify_curie(safe_get(a, 'object', 'id'))
+            predicate_match = predicate == safe_get(a, 'predicate')
+
+            edge_label = safe_get(a, 'edge', 'label')
+            if edge_label is not None:
+                edge_label = edge_label.replace(' ', '_')
+                predicate = predicate.replace(' ', '_')
+
+            label_match = predicate == edge_label
+
+            if object_match and (label_match or predicate_match):
+                provided_by = safe_get(a, 'edge', 'provided_by')
+                probability = safe_get(a, 'edge', 'probability')
+                predicate = safe_get(a, 'predicate')
+                is_defined_by = safe_get(a, 'api')
+                endpoint = safe_get(a, 'endpoint')
+
+                annotations = []
+
+                if probability is not None:
+                    annotations.append(BeaconStatementAnnotation(tag='probability', value=probability))
+                if predicate is not None:
+                    annotations.append(BeaconStatementAnnotation(tag='predicate', value=predicate))
+                if endpoint is not None:
+                    annotations.append(BeaconStatementAnnotation(tag='endpoint', value=endpoint))
+                    annotations.append(BeaconStatementAnnotation(tag='endpoint_input', value=subject_id))
+
+                return BeaconStatementWithDetails(
+                    provided_by=provided_by,
+                    is_defined_by=is_defined_by,
+                    annotation=annotations
+                )
+
     return BeaconStatementWithDetails()
 
 
@@ -84,8 +134,9 @@ def build_statement(
         relation=predicate_id,
         negated=None
     )
+    statement_id = '{}:{}:{}'.format(subject_id, predicate_name, object_id)
     return BeaconStatement(
-        id=None,
+        id=statement_id,
         subject=beacon_subject,
         predicate=beacon_predicate,
         object=beacon_object
@@ -129,6 +180,19 @@ def remove_duplicates(l:list):
     but do not implement _hash_. For such cases l = list(set(l)) wont work.
     """
     return [obj for index, obj in enumerate(l) if obj not in l[index + 1:]]
+
+def simplify_curie(curie:str) -> str:
+    """
+    Ensures that there are no duplicate components in the curie. Biothings
+    explorer has a bug where curies appear like: HP:HP:0001959, when it should
+    just be HP:0001959.
+    """
+    if curie is None:
+        return None
+    else:
+        components = curie.split(':')
+        unique_components = [c for i, c in enumerate(components) if c not in components[:i]]
+        return ':'.join(unique_components)
 
 def get_statements(s, edge_label=None, relation=None, t=None, keywords=None, categories=None, size=None, enforce_biolink_model=None, ignore_incomplete_data=None):  # noqa: E501
     statements = []
@@ -176,6 +240,9 @@ def get_statements(s, edge_label=None, relation=None, t=None, keywords=None, cat
                 if predicate_name == 'EquivalentAssociation':
                     predicate_name = 'same_as'
                 predicate_name = predicate_name.replace(' ', '_')
+
+                object_id = simplify_curie(object_id)
+                subject_id = simplify_curie(subject_id)
 
                 statements.append(build_statement(
                     object_id=object_id,
