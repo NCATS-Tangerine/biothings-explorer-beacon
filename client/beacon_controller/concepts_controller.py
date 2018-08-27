@@ -36,7 +36,7 @@ def get_concept_details(conceptId):
     prefix, _ = conceptId.split(':', 1)
 
     c = BeaconConceptWithDetails(
-        id=conceptId,
+        id=simplify_curie(conceptId),
         name=names[0] if len(names) >= 1 else None,
         synonyms=names[1:],
         exact_matches=xrefs,
