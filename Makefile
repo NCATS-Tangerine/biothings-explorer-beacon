@@ -16,7 +16,7 @@ docker-build:
 	docker build -t ncats:biothings-explorer-beacon .
 
 docker-run:
-	docker run --rm --name biothings -p 8084:8080 ncats:biothings-explorer-beacon
+	docker run -d --rm --name biothings -p 8084:8080 ncats:biothings-explorer-beacon
 
 docker-stop:
 	docker stop biothings
