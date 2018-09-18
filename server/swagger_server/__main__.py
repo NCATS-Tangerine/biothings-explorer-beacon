@@ -15,7 +15,7 @@ def main():
     app.app.json_encoder = encoder.JSONEncoder
     app.add_api(
         'swagger.yaml',
-        base_path=BASEPATH
+        base_path=BASEPATH,
         arguments={'title': 'Biothings Explorer Translator Knowledge Beacon API'}
     )
     app.add_error_handler(404, handle_error)
