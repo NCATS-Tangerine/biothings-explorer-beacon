@@ -5,15 +5,20 @@ import connexion
 from swagger_server import encoder
 from flask import redirect
 
-app = connexion.App(__name__, specification_dir='./swagger/')
+BASEPATH = '/beacon/biothings-explorer/'
 
-@app.route('/')
-def to_UI():
-    return redirect('/ui')
+def handle_error(e):
+    return redirect(f'{BASEPATH}ui/')
 
 def main():
+    app = connexion.App(__name__, specification_dir='./swagger/')
     app.app.json_encoder = encoder.JSONEncoder
-    app.add_api('swagger.yaml', arguments={'title': 'Biothings Explorer Translator Knowledge Beacon API'})
+    app.add_api(
+        'swagger.yaml',
+        base_path=BASEPATH
+        arguments={'title': 'Biothings Explorer Translator Knowledge Beacon API'}
+    )
+    app.add_error_handler(404, handle_error)
     app.run(port=8080)
 
 
