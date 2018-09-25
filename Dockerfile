@@ -1,18 +1,19 @@
-FROM python:3-alpine
+FROM python:3.6
 
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 
-COPY requirements.txt /usr/src/app/
-COPY beacon_controller /usr/src/app/
-COPY config /usr/src/app/
-COPY server /usr/src/app/
+COPY requirements.txt /usr/src/app/requirements.txt
+COPY beacon_controller /usr/src/app/beacon_controller
+COPY config /usr/src/app/config
+COPY server /usr/src/app/server
 
-COPY Makefile /usr/src/app/
-COPY MANIFEST.in /usr/src/app/
-COPY setup.py /usr/src/app/
+COPY MANIFEST.in /usr/src/app/MANIFEST.in
+COPY setup.py /usr/src/app/setup.py
 
-RUN make && make run
+RUN python setup.py install
+
+WORKDIR /usr/src/app/server
 
 EXPOSE 8080
 
