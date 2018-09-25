@@ -1,0 +1,7 @@
+basepath: /beacon/biothings-explorer/
+title: Biothings Explorer Translator Knowledge Beacon API
+
+# By default we will use "tornado" for production. Alternatively "flask" can be
+# used for the default non-concurrent flask server. Or you can install and
+# use another.
+server: tornado

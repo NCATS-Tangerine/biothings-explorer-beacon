@@ -1,15 +1,13 @@
 install:
-	pip install --no-cache-dir -r requirements.txt
-	pip install client/
+	pip install .
 	pip install server/
 
 dev-install:
-	pip install --no-cache-dir -r requirements.txt
-	pip install -e client/
+	pip install -e .
 	pip install server/
 
 run:
-	cd server && python -m swagger_server
+	python -m swagger_server
 
 docker-build:
 	docker build -t ncats:biothings-explorer-beacon .
