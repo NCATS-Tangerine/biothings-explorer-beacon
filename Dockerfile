@@ -4,14 +4,15 @@ RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 
 COPY requirements.txt /usr/src/app/
+COPY beacon_controller /usr/src/app/
+COPY config /usr/src/app/
+COPY server /usr/src/app/
 
-RUN pip3 install --no-cache-dir -r requirements.txt
+COPY Makefile /usr/src/app/
+COPY MANIFEST.in /usr/src/app/
+COPY setup.py /usr/src/app/
 
-COPY . /usr/src/app
-
-RUN pip install client/ && pip install server/
-
-WORKDIR /usr/src/app/server
+RUN make && make run
 
 EXPOSE 8080
 
