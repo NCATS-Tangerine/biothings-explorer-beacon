@@ -30,3 +30,5 @@ Noteworthy changes to the generated main function:
 - The [Tornado](https://connexion.readthedocs.io/en/1.0.29/quickstart.html#server-backend) server is used in the backend, as the default Flask server does not support concurrency
 - 404 errors are redirected to the Swagger UI page
 - The application is set to run on port 8080
+
+Many of these properties can be set within config/config.yaml
