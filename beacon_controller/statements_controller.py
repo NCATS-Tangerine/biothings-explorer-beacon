@@ -120,6 +120,11 @@ def build_statement(
     predicate_id,
     predicate_name
     ):
+    if predicate_name not in blm.schema().slots:
+        if predicate_id is None:
+            predicate_id = predicate_name
+        predicate_name = blm.DEFAULT_EDGE_LABEL
+
     beacon_subject = BeaconStatementSubject(
         id=subject_id,
         name=subject_name,
@@ -227,6 +232,13 @@ def get_statements(s, edge_label=None, relation=None, t=None, keywords=None, cat
                     predicate_name = safe_get(a, 'predicate')
                 if predicate_name == 'EquivalentAssociation':
                     predicate_name = 'same_as'
+
+                if isinstance(predicate_name, list):
+                    if predicate_name != []:
+                        predicate_name = predicate_name[0]
+                    else:
+                        predicate_name = blm.DEFAULT_EDGE_LABEL
+
                 predicate_name = predicate_name.replace(' ', '_')
 
                 object_id = simplify_curie(object_id)
@@ -253,5 +265,5 @@ def get_statements(s, edge_label=None, relation=None, t=None, keywords=None, cat
     )
 
     statements = remove_duplicates(statements)
-    statements = [s for s in statements if s.predicate.edge_label.replace('_', ' ') in blm.schema().slots]
+
     return statements
