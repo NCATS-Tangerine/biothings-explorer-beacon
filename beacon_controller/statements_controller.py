@@ -120,9 +120,9 @@ def build_statement(
     predicate_id,
     predicate_name
     ):
+    if predicate_id is None:
+        predicate_id = predicate_name
     if predicate_name.replace('_', ' ') not in blm.schema().slots:
-        if predicate_id is None:
-            predicate_id = predicate_name
         predicate_name = blm.DEFAULT_EDGE_LABEL
 
     beacon_subject = BeaconStatementSubject(
