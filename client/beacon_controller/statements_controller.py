@@ -8,6 +8,7 @@ from swagger_server.models.beacon_statement_predicate import BeaconStatementPred
 from swagger_server.models.beacon_statement_subject import BeaconStatementSubject
 
 from beacon_controller import utils
+from beacon_controller import biolink_model as blm
 
 from typing import List
 from collections import defaultdict
@@ -252,5 +253,5 @@ def get_statements(s, edge_label=None, relation=None, t=None, keywords=None, cat
     )
 
     statements = remove_duplicates(statements)
-
+    statements = [s for s in statements if s.predicate.edge_label.replace('_', ' ') in blm.schema().slots]
     return statements
