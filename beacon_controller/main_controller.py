@@ -18,6 +18,7 @@ def main(name:str):
     """
     app = connexion.App(name, specification_dir='./swagger/', server=config['server'])
     app.app.json_encoder = encoder.JSONEncoder
+    app.app.json_encoder.include_nulls = True
     app.add_api(
         'swagger.yaml',
         base_path=config['basepath'],
