@@ -156,8 +156,14 @@ def get_predicates():  # noqa: E501
                 relation=p
                 uri=blm.slot_uri(blm.DEFAULT_EDGE_LABEL)
 
+            try:
+                description = blm.schema().slots[edge_label.replace('_', ' ')].description
+            except:
+                description = None
+
             predicates.append(BeaconPredicate(
                 id=predicate_id,
+                description=description,
                 edge_label=edge_label,
                 relation=relation,
                 uri=uri,
