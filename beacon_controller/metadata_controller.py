@@ -9,6 +9,8 @@ from collections import defaultdict
 from functools import lru_cache
 from beacon_controller.utils import safe_get
 
+from beacon_controller import biolink_model as blm
+
 import requests
 
 @lru_cache(maxsize=128)
@@ -28,8 +30,20 @@ def get_concept_categories():  # noqa: E501
         data = response.json()
 
         for key in data['bioentity'].keys():
-            categories.append(BeaconConceptCategory(
+            if key in blm.schema().classes:
+                category_id=f'blm:{key}'
                 category=key
+                uri=blm.class_uri(key)
+            else:
+                category_id=f'blm:{blm.DEFAULT_CATEGORY}'
+                category=blm.DEFAULT_CATEGORY
+                uri=blm.class_uri(blm.DEFAULT_CATEGORY)
+
+            categories.append(BeaconConceptCategory(
+                id=category_id,
+                category=category,
+                uri=uri,
+                local_category=key,
             ))
 
     return categories
@@ -60,7 +74,7 @@ def get_knowledge_map():  # noqa: E501
             object_prefix = safe_get(a, 'object', 'prefix')
             endpoint = safe_get(a, 'endpoint')
 
-            k = '{}{}{}'.format(subject_category, predicate, object_category)
+            k = f'{subject_category}{predicate}{object_category}'
 
             d[k]['subject_prefix'].add(subject_prefix)
             d[k]['object_prefix'].add(object_prefix)
@@ -70,23 +84,38 @@ def get_knowledge_map():  # noqa: E501
             d[k]['endpoint'] = endpoint
 
         for p in d.values():
+            object_category = p['object_category']
+            subject_category = p['subject_category']
+
+            if object_category not in blm.schema().classes:
+                object_category = blm.DEFAULT_CATEGORY
+
+            if subject_category not in blm.schema().classes:
+                subject_category = blm.DEFAULT_CATEGORY
+
+            if p['predicate'].replace('_', ' ') in blm.schema().slots:
+                edge_label = p['predicate'].replace(' ', '_')
+                relation = edge_label
+            else:
+                edge_label = blm.DEFAULT_EDGE_LABEL
+                relation = p['predicate']
+
+
             o = BeaconKnowledgeMapObject(
-                category=p['object_category'],
+                category=object_category,
                 prefixes=list(p['object_prefix'])
             )
             s = BeaconKnowledgeMapSubject(
-                category=p['subject_category'],
+                category=subject_category,
                 prefixes=list(p['subject_prefix'])
             )
-            if p['predicate'] == p['predicate'].lower():
-                args = {'edge_label' : p['predicate']}
-            else:
-                args = {'relation' : p['predicate']}
 
             r = BeaconKnowledgeMapPredicate(
-                negated=False,
-                **args
+                edge_label=edge_label,
+                relation=relation,
+                negated=False
             )
+
             statements.append(BeaconKnowledgeMapStatement(
                 subject=s,
                 object=o,
@@ -116,9 +145,29 @@ def get_predicates():  # noqa: E501
             s.add(safe_get(a, 'predicate'))
 
         for p in s:
-            if p == p.lower():
-                predicates.append(BeaconPredicate(edge_label=p))
+            if p.replace('_', ' ') in blm.schema().slots:
+                edge_label = p.replace(' ', '_')
+                predicate_id=f'blm:{edge_label}'
+                relation = edge_label
+                uri=blm.slot_uri(edge_label)
             else:
-                predicates.append(BeaconPredicate(relation=p))
+                predicate_id=f'blm:{blm.DEFAULT_EDGE_LABEL}'
+                edge_label=blm.DEFAULT_EDGE_LABEL
+                relation=p
+                uri=blm.slot_uri(blm.DEFAULT_EDGE_LABEL)
+
+            try:
+                description = blm.schema().slots[edge_label.replace('_', ' ')].description
+            except:
+                description = None
+
+            predicates.append(BeaconPredicate(
+                id=predicate_id,
+                description=description,
+                edge_label=edge_label,
+                relation=relation,
+                uri=uri,
+                local_relation=relation
+            ))
 
     return predicates

@@ -11,6 +11,8 @@ import requests
 from typing import List
 from flask import abort
 
+from beacon_controller import biolink_model as blm
+
 bioentities_endpoint = 'http://biothings.io/explorer/api/v2/metadata/bioentities'
 
 _category_map = None
@@ -33,7 +35,12 @@ def lookup_category(prefix:str) -> str:
         else:
             abort(500, 'Could not connect to: {}'.format(bioentities_endpoint))
 
-    return _category_map.get(prefix.lower())
+    category = _category_map.get(prefix.lower())
+
+    if category in blm.schema().classes:
+        return category
+    else:
+        return blm.DEFAULT_CATEGORY
 
 def simplify_curie(curie:str) -> str:
     """
