@@ -42,6 +42,54 @@ def lookup_category(prefix:str) -> str:
     else:
         return blm.DEFAULT_CATEGORY
 
+bioentities = None
+kmap = None
+
+def load_bioentities() -> dict:
+    global bioentities
+
+    if bioentities is None:
+        bioentities = requests.get('http://biothings.io/explorer/api/v2/metadata/bioentities').json()
+
+    return bioentities
+
+def load_kmap() -> dict:
+    global kmap
+
+    if kmap is None:
+        kmap = requests.get('http://biothings.io/explorer/api/v2/knowledgemap').json()
+
+    return kmap
+
+def fix_curie(curie:str) -> str:
+    """
+    Biothings explorer has some very weird curie prefixes, like "HP:HP:0012092"
+    and "MESH.DISEASE:ICD10CM:E11.8". This method chooses the first prefix that
+    appears in the response of the bioentities endpoint. If it can't fix the
+    curie then it returns it.
+
+    Example:
+    fix_curie("HP:HP:0012092")
+    >>> "hp:0012092"
+    fix_curie("MESH.DISEASE:ICD10CM:E11.8")
+    >>> "mesh.disease:E11.8"
+    """
+    components = curie.split(':')
+
+    bioentities = load_bioentities()['bioentity']
+
+    if len(components) == 2:
+        return curie
+    else:
+        local_id = components.pop(-1)
+        for prefix in components:
+            prefix = prefix.lower()
+            for category, prefixes in bioentities.items():
+                if prefix in prefixes:
+                    return f'{prefix.upper()}:{local_id}'
+        else:
+            return curie
+
 def simplify_curie(curie:str) -> str:
     """
     Ensures that there are no duplicate components in the curie. Biothings

@@ -8,35 +8,36 @@ from swagger_server import util
 
 import beacon_controller
 
-def get_concept_details(conceptId):  # noqa: E501
+def get_concept_details(concept_id):  # noqa: E501
     """get_concept_details
 
     Retrieves details for a specified concepts in the system, as specified by a (url-encoded) CURIE identifier of a concept known the given knowledge source.  # noqa: E501
 
-    :param conceptId: (url-encoded) CURIE identifier of concept of interest
-    :type conceptId: str
+    :param concept_id: (url-encoded) CURIE identifier of concept of interest
+    :type concept_id: str
 
     :rtype: BeaconConceptWithDetails
     """
-    return beacon_controller.get_concept_details(conceptId)
+    return beacon_controller.get_concept_details(concept_id)
 
 
-def get_concepts(keywords, categories=None, size=None):  # noqa: E501
+def get_concepts(keywords=None, categories=None, offset=None, size=None):  # noqa: E501
     """get_concepts
 
     Retrieves a list of whose concept in the beacon knowledge base with names and/or synonyms matching a set of keywords or substrings. The results returned should generally be returned in order of the quality of the match, that is, the highest ranked concepts should exactly match the most keywords, in the same order as the keywords were given. Lower quality hits with fewer keyword matches or out-of-order keyword matches, should be returned lower in the list.  # noqa: E501
 
-    :param keywords: an array of keywords or substrings against which to match concept names and synonyms
+    :param keywords: (Optional) array of keywords or substrings against which to match concept names and synonyms
     :type keywords: List[str]
-    :param categories: an array set of concept categories - specified as Biolink name labels codes gene, pathway, etc. - to which to constrain concepts matched by the main keyword search (see [Biolink Model](https://biolink.github.io/biolink-model) for the full list of terms)
+    :param categories: (Optional) array set of concept categories - specified as Biolink name labels codes gene, pathway, etc. - to which to constrain concepts matched by the main keyword search (see [Biolink Model](https://biolink.github.io/biolink-model) for the full list of terms)
     :type categories: List[str]
-    :param size: maximum number of concept entries requested by the client; if this argument is omitted, then the query is expected to returned all  the available data for the query
+    :param offset: offset (cursor position) to next batch of statements of amount &#39;size&#39; to return.
+    :type offset: int
+    :param size: maximum number of concept entries requested by the client; if this argument is omitted, then the query is expected to returned all the available data for the query
     :type size: int
 
     :rtype: List[BeaconConcept]
     """
-    return beacon_controller.get_concepts(keywords, categories, size)
-
+    return beacon_controller.get_concepts(keywords, categories, offset, size)
 
 
 def get_exact_matches_to_concept_list(c):  # noqa: E501

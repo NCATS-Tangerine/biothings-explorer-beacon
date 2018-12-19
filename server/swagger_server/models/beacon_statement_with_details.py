@@ -188,6 +188,7 @@ class BeaconStatementWithDetails(Model):
     def evidence(self) -> List[BeaconStatementCitation]:
         """Gets the evidence of this BeaconStatementWithDetails.
 
+        Array of research citations serving as supporting evidence for this knowledge statement.   # noqa: E501
 
         :return: The evidence of this BeaconStatementWithDetails.
         :rtype: List[BeaconStatementCitation]
@@ -198,6 +199,7 @@ class BeaconStatementWithDetails(Model):
     def evidence(self, evidence: List[BeaconStatementCitation]):
         """Sets the evidence of this BeaconStatementWithDetails.
 
+        Array of research citations serving as supporting evidence for this knowledge statement.   # noqa: E501
 
         :param evidence: The evidence of this BeaconStatementWithDetails.
         :type evidence: List[BeaconStatementCitation]

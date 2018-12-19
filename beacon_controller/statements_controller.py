@@ -7,6 +7,8 @@ from swagger_server.models.beacon_statement_object import BeaconStatementObject
 from swagger_server.models.beacon_statement_predicate import BeaconStatementPredicate
 from swagger_server.models.beacon_statement_subject import BeaconStatementSubject
 
+from flask import abort
+
 from beacon_controller import utils
 from beacon_controller import biolink_model as blm
 
@@ -16,7 +18,7 @@ from collections import defaultdict
 from beacon_controller.utils import safe_get, simplify_curie
 from beacon_controller import crawler
 
-def get_statement_details(statementId, keywords=None, size=None):
+def get_statement_details(statementId, keywords=None, offset=None, size=None):
     if ':' not in statementId:
         return BeaconStatementWithDetails()
 
@@ -126,19 +128,19 @@ def build_statement(
         predicate_name = blm.DEFAULT_EDGE_LABEL
 
     beacon_subject = BeaconStatementSubject(
-        id=subject_id,
+        id=utils.fix_curie(subject_id),
         name=subject_name,
         categories=[subject_category]
     )
     beacon_object = BeaconStatementObject(
-        id=object_id,
+        id=utils.fix_curie(object_id),
         name=object_name,
         categories=[object_category]
     )
     beacon_predicate = BeaconStatementPredicate(
         edge_label=predicate_name,
         relation=predicate_id,
-        negated=None
+        negated=False
     )
     statement_id = '{}:{}:{}'.format(subject_id, predicate_name, object_id)
     return BeaconStatement(
@@ -154,31 +156,30 @@ def lower(s:str):
     else:
         return None
 
-def apply_filters(statements, edge_label=None, relation=None, t=None, keywords=None, categories=None):
-    results = []
-    for statement in statements:
-        o = statement.object
-        p = statement.predicate
+def build_filter(s=None, s_keywords=None, s_categories=None, edge_label=None, relation=None, t=None, t_keywords=None, t_categories=None):
+    def is_valid(statement):
+        try:
+            if s is not None and not any(lower(statement.subject.id) == lower(subject_id) for subject_id in s):
+                return False
+            if t is not None and not any(lower(statement.object.id) == lower(object_id) for object_id in t):
+                return False
+            if s_categories is not None and not any(c in statement.subject.categories for c in s_categories):
+                return False
+            if t_categories is not None and not any(c in statement.object.categories for c in t_categories):
+                return False
+            if s_keywords is not None and not any(k in statement.subject.name for k in s_keywords):
+                return False
+            if t_keywords is not None and not any(k in statement.object.name for k in t_keywords):
+                return False
+            if edge_label is not None and statement.predicate.edge_label != edge_label:
+                return False
+            if relation is not None and statement.predicate.relation != relation:
+                return False
+            return True
+        except:
+            return False
 
-        if t != None and not any(lower(o.id) == lower(target_id) for target_id in t):
-            continue
-
-        if categories != None and not any(lower(o.category) == lower(category) for category in categories):
-            continue
-
-        if keywords != None:
-            if o.name == None or not any(lower(keyword) in lower(o.name) for keyword in keywords):
-                continue
-
-        if relation != None and lower(p.relation) != lower(relation):
-            continue
-
-        if edge_label != None and lower(p.edge_label) != lower(edge_label):
-            continue
-
-        results.append(statement)
-
-    return results
+    return is_valid
 
 def remove_duplicates(l:list):
     """
@@ -187,7 +188,10 @@ def remove_duplicates(l:list):
     """
     return [obj for index, obj in enumerate(l) if obj not in l[index + 1:]]
 
-def get_statements(s, edge_label=None, relation=None, t=None, keywords=None, categories=None, size=None, enforce_biolink_model=None, ignore_incomplete_data=None):  # noqa: E501
+def get_statements(s=None, s_keywords=None, s_categories=None, edge_label=None, relation=None, t=None, t_keywords=None, t_categories=None, offset=None, size=None):
+    if s is None:
+        abort(400, 'Cannot search for statements without providing a subject ID')
+
     statements = []
 
     for subject_id in s:
@@ -255,15 +259,15 @@ def get_statements(s, edge_label=None, relation=None, t=None, keywords=None, cat
                     predicate_name=predicate_name
                 ))
 
-    statements = apply_filters(
-        statements,
-        edge_label=edge_label,
-        relation=relation,
-        t=t,
-        keywords=keywords,
-        categories=categories
-    )
+    is_valid = build_filter(s, s_keywords, s_categories, edge_label, relation, t, t_keywords, t_categories)
+
+    statements = [s for s in statements if is_valid(s)]
 
     statements = remove_duplicates(statements)
+
+    if offset is not None:
+        statements = statements[offset:]
+    if size is not None:
+        statements = statements[:size]
 
     return statements

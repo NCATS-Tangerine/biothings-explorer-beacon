@@ -15,59 +15,34 @@ class BeaconPredicate(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id: str=None, uri: str=None, edge_label: str=None, relation: str=None, local_id: str=None, local_uri: str=None, local_relation: str=None, description: str=None, frequency: int=None):  # noqa: E501
+    def __init__(self, edge_label: str=None, relation: str=None, description: str=None, frequency: int=None):  # noqa: E501
         """BeaconPredicate - a model defined in Swagger
 
-        :param id: The id of this BeaconPredicate.  # noqa: E501
-        :type id: str
-        :param uri: The uri of this BeaconPredicate.  # noqa: E501
-        :type uri: str
         :param edge_label: The edge_label of this BeaconPredicate.  # noqa: E501
         :type edge_label: str
         :param relation: The relation of this BeaconPredicate.  # noqa: E501
         :type relation: str
-        :param local_id: The local_id of this BeaconPredicate.  # noqa: E501
-        :type local_id: str
-        :param local_uri: The local_uri of this BeaconPredicate.  # noqa: E501
-        :type local_uri: str
-        :param local_relation: The local_relation of this BeaconPredicate.  # noqa: E501
-        :type local_relation: str
         :param description: The description of this BeaconPredicate.  # noqa: E501
         :type description: str
         :param frequency: The frequency of this BeaconPredicate.  # noqa: E501
         :type frequency: int
         """
         self.swagger_types = {
-            'id': str,
-            'uri': str,
             'edge_label': str,
             'relation': str,
-            'local_id': str,
-            'local_uri': str,
-            'local_relation': str,
             'description': str,
             'frequency': int
         }
 
         self.attribute_map = {
-            'id': 'id',
-            'uri': 'uri',
             'edge_label': 'edge_label',
             'relation': 'relation',
-            'local_id': 'local_id',
-            'local_uri': 'local_uri',
-            'local_relation': 'local_relation',
             'description': 'description',
             'frequency': 'frequency'
         }
 
-        self._id = id
-        self._uri = uri
         self._edge_label = edge_label
         self._relation = relation
-        self._local_id = local_id
-        self._local_uri = local_uri
-        self._local_relation = local_relation
         self._description = description
         self._frequency = frequency
 
@@ -81,52 +56,6 @@ class BeaconPredicate(Model):
         :rtype: BeaconPredicate
         """
         return util.deserialize_model(dikt, cls)
-
-    @property
-    def id(self) -> str:
-        """Gets the id of this BeaconPredicate.
-
-        CURIE-encoded identifier of predicate relation   # noqa: E501
-
-        :return: The id of this BeaconPredicate.
-        :rtype: str
-        """
-        return self._id
-
-    @id.setter
-    def id(self, id: str):
-        """Sets the id of this BeaconPredicate.
-
-        CURIE-encoded identifier of predicate relation   # noqa: E501
-
-        :param id: The id of this BeaconPredicate.
-        :type id: str
-        """
-
-        self._id = id
-
-    @property
-    def uri(self) -> str:
-        """Gets the uri of this BeaconPredicate.
-
-        The predicate URI which should generally resolves to the full semantic description of the predicate relation  # noqa: E501
-
-        :return: The uri of this BeaconPredicate.
-        :rtype: str
-        """
-        return self._uri
-
-    @uri.setter
-    def uri(self, uri: str):
-        """Sets the uri of this BeaconPredicate.
-
-        The predicate URI which should generally resolves to the full semantic description of the predicate relation  # noqa: E501
-
-        :param uri: The uri of this BeaconPredicate.
-        :type uri: str
-        """
-
-        self._uri = uri
 
     @property
     def edge_label(self) -> str:
@@ -173,75 +102,6 @@ class BeaconPredicate(Model):
         """
 
         self._relation = relation
-
-    @property
-    def local_id(self) -> str:
-        """Gets the local_id of this BeaconPredicate.
-
-        CURIE-encoded identifier of the locally defined predicate relation. Such terms should be formally documented as mappings in the [Biolink Model](https://biolink.github.io/biolink-model)   # noqa: E501
-
-        :return: The local_id of this BeaconPredicate.
-        :rtype: str
-        """
-        return self._local_id
-
-    @local_id.setter
-    def local_id(self, local_id: str):
-        """Sets the local_id of this BeaconPredicate.
-
-        CURIE-encoded identifier of the locally defined predicate relation. Such terms should be formally documented as mappings in the [Biolink Model](https://biolink.github.io/biolink-model)   # noqa: E501
-
-        :param local_id: The local_id of this BeaconPredicate.
-        :type local_id: str
-        """
-
-        self._local_id = local_id
-
-    @property
-    def local_uri(self) -> str:
-        """Gets the local_uri of this BeaconPredicate.
-
-        The predicate URI which should generally resolves  to the local predicate relation  # noqa: E501
-
-        :return: The local_uri of this BeaconPredicate.
-        :rtype: str
-        """
-        return self._local_uri
-
-    @local_uri.setter
-    def local_uri(self, local_uri: str):
-        """Sets the local_uri of this BeaconPredicate.
-
-        The predicate URI which should generally resolves  to the local predicate relation  # noqa: E501
-
-        :param local_uri: The local_uri of this BeaconPredicate.
-        :type local_uri: str
-        """
-
-        self._local_uri = local_uri
-
-    @property
-    def local_relation(self) -> str:
-        """Gets the local_relation of this BeaconPredicate.
-
-        human readable name of the locally defined predicate relation   # noqa: E501
-
-        :return: The local_relation of this BeaconPredicate.
-        :rtype: str
-        """
-        return self._local_relation
-
-    @local_relation.setter
-    def local_relation(self, local_relation: str):
-        """Sets the local_relation of this BeaconPredicate.
-
-        human readable name of the locally defined predicate relation   # noqa: E501
-
-        :param local_relation: The local_relation of this BeaconPredicate.
-        :type local_relation: str
-        """
-
-        self._local_relation = local_relation
 
     @property
     def description(self) -> str:

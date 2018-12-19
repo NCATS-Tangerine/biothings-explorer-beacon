@@ -15,19 +15,11 @@ class BeaconConceptCategory(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id: str=None, uri: str=None, category: str=None, local_id: str=None, local_uri: str=None, local_category: str=None, description: str=None, frequency: int=None):  # noqa: E501
+    def __init__(self, category: str=None, local_category: str=None, description: str=None, frequency: int=None):  # noqa: E501
         """BeaconConceptCategory - a model defined in Swagger
 
-        :param id: The id of this BeaconConceptCategory.  # noqa: E501
-        :type id: str
-        :param uri: The uri of this BeaconConceptCategory.  # noqa: E501
-        :type uri: str
         :param category: The category of this BeaconConceptCategory.  # noqa: E501
         :type category: str
-        :param local_id: The local_id of this BeaconConceptCategory.  # noqa: E501
-        :type local_id: str
-        :param local_uri: The local_uri of this BeaconConceptCategory.  # noqa: E501
-        :type local_uri: str
         :param local_category: The local_category of this BeaconConceptCategory.  # noqa: E501
         :type local_category: str
         :param description: The description of this BeaconConceptCategory.  # noqa: E501
@@ -36,32 +28,20 @@ class BeaconConceptCategory(Model):
         :type frequency: int
         """
         self.swagger_types = {
-            'id': str,
-            'uri': str,
             'category': str,
-            'local_id': str,
-            'local_uri': str,
             'local_category': str,
             'description': str,
             'frequency': int
         }
 
         self.attribute_map = {
-            'id': 'id',
-            'uri': 'uri',
             'category': 'category',
-            'local_id': 'local_id',
-            'local_uri': 'local_uri',
             'local_category': 'local_category',
             'description': 'description',
             'frequency': 'frequency'
         }
 
-        self._id = id
-        self._uri = uri
         self._category = category
-        self._local_id = local_id
-        self._local_uri = local_uri
         self._local_category = local_category
         self._description = description
         self._frequency = frequency
@@ -76,52 +56,6 @@ class BeaconConceptCategory(Model):
         :rtype: BeaconConceptCategory
         """
         return util.deserialize_model(dikt, cls)
-
-    @property
-    def id(self) -> str:
-        """Gets the id of this BeaconConceptCategory.
-
-        the CURIE of the concept category  # noqa: E501
-
-        :return: The id of this BeaconConceptCategory.
-        :rtype: str
-        """
-        return self._id
-
-    @id.setter
-    def id(self, id: str):
-        """Sets the id of this BeaconConceptCategory.
-
-        the CURIE of the concept category  # noqa: E501
-
-        :param id: The id of this BeaconConceptCategory.
-        :type id: str
-        """
-
-        self._id = id
-
-    @property
-    def uri(self) -> str:
-        """Gets the uri of this BeaconConceptCategory.
-
-        The category URI which should generally resolves to  the full semantic description of the category  # noqa: E501
-
-        :return: The uri of this BeaconConceptCategory.
-        :rtype: str
-        """
-        return self._uri
-
-    @uri.setter
-    def uri(self, uri: str):
-        """Sets the uri of this BeaconConceptCategory.
-
-        The category URI which should generally resolves to  the full semantic description of the category  # noqa: E501
-
-        :param uri: The uri of this BeaconConceptCategory.
-        :type uri: str
-        """
-
-        self._uri = uri
 
     @property
     def category(self) -> str:
@@ -147,56 +81,10 @@ class BeaconConceptCategory(Model):
         self._category = category
 
     @property
-    def local_id(self) -> str:
-        """Gets the local_id of this BeaconConceptCategory.
-
-        the locally designated CURIE of the concept category  # noqa: E501
-
-        :return: The local_id of this BeaconConceptCategory.
-        :rtype: str
-        """
-        return self._local_id
-
-    @local_id.setter
-    def local_id(self, local_id: str):
-        """Sets the local_id of this BeaconConceptCategory.
-
-        the locally designated CURIE of the concept category  # noqa: E501
-
-        :param local_id: The local_id of this BeaconConceptCategory.
-        :type local_id: str
-        """
-
-        self._local_id = local_id
-
-    @property
-    def local_uri(self) -> str:
-        """Gets the local_uri of this BeaconConceptCategory.
-
-        This locally designated category URI should generally resolve to the full semantic description of the category  # noqa: E501
-
-        :return: The local_uri of this BeaconConceptCategory.
-        :rtype: str
-        """
-        return self._local_uri
-
-    @local_uri.setter
-    def local_uri(self, local_uri: str):
-        """Sets the local_uri of this BeaconConceptCategory.
-
-        This locally designated category URI should generally resolve to the full semantic description of the category  # noqa: E501
-
-        :param local_uri: The local_uri of this BeaconConceptCategory.
-        :type local_uri: str
-        """
-
-        self._local_uri = local_uri
-
-    @property
     def local_category(self) -> str:
         """Gets the local_category of this BeaconConceptCategory.
 
-        human readable local semantic type name (\"rdfs:label\")  # noqa: E501
+        the locally designated CURIE of the concept category  # noqa: E501
 
         :return: The local_category of this BeaconConceptCategory.
         :rtype: str
@@ -207,7 +95,7 @@ class BeaconConceptCategory(Model):
     def local_category(self, local_category: str):
         """Sets the local_category of this BeaconConceptCategory.
 
-        human readable local semantic type name (\"rdfs:label\")  # noqa: E501
+        the locally designated CURIE of the concept category  # noqa: E501
 
         :param local_category: The local_category of this BeaconConceptCategory.
         :type local_category: str
