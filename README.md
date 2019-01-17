@@ -1,34 +1,66 @@
-# biothings-explorer-beacon
+# Biothings Explorer Beacon
+
+Knowledge beacon wrapper for http://biothings.io/explorer/api/
 
 Hosted at https://kba.ncats.io/beacon/biothings-explorer
 
-Instructions to run in a virtual environment:
-```
+## Getting started
+
+### Create virtual environment
+
+It is helpful to keep a local virtual environment in which all local dependencies as well as the application can be installed.
+
+```sh
 virtualenv -p python3.6 venv
 source venv/bin/activate
-make
+```
+
+### Configuring
+
+The [config/config.yaml](config/config.yaml) file can be modified to change some behaviours of this application.
+
+### Installing the application
+
+The [Makefile](Makefile) in the root directory can be used to install the application.
+
+```shell
+make install
+```
+
+### Running
+
+The [Makefile](Makefile) in the root directory can be used to run the application:
+
+```shell
 make run
 ```
-View it at: http://localhost:8080
 
-Instructions to run in docker:
-```
+View it at http://localhost:8080
+
+Alternatively you can run the application as a Docker container:
+
+```shell
 make docker-build
 make docker-run
 ```
-View it at: http://localhost:8084
 
-## Developer notes
-The server sub-project has been generated with swagger and is only slightly modified. The `beacon_controller` package contains all the implementation code for the swagger generated server stub methods in `swagger_server/controllers/...`, and for the main method in `swagger_server/__main__.py`. The goal of this is to separate the implementation details from the generated code, and minimize what gets overwritten with each re-generation of the server sub-project.
+View it at http://localhost:8084
 
-> **Note:** with every re-generation of the server project, developers should do a git diff of each file to ensure that nothing important is being overwritten. It will be immediately obvious that the `swagger_server/controllers/...` files are overwritten as the beacon will stop functioning altogether. If the `swagger_server/__main__.py` file is overwritten the beacon will appear to function properly, but will lack important features!
+## Project structure
 
-Noteworthy changes to the generated main function:
-- The Swagger UI path is set to the root
-- The Swagger UI title is set in the code
-- The base path is set in the code
-- The [Tornado](https://connexion.readthedocs.io/en/1.0.29/quickstart.html#server-backend) server is used in the backend, as the default Flask server does not support concurrency
-- 404 errors are redirected to the Swagger UI page
-- The application is set to run on port 8080
 
-Many of these properties can be set within config/config.yaml
+The `beacon` package was generated with Swagger, and the `beacon_controller` package is where all the implementation details are kept.
+
+The `beacon` package can be regenerated with the Make command. But first make sure to update the `SPECIFICATION` parameter in [Makefile](Makefile) first if the specification file has a new name.
+
+```
+make regenerate
+```
+
+Alternatively, you can run swagger-codegen-cli.jar directly:
+
+```
+java -jar swagger-codegen-cli.jar generate -i <path-to-specification-file> -l python-flask -o beacon
+```
+
+Do a careful `git diff` review of the project after regenerating to make sure that nothing vital was overwritten, and to see all the changes made. Since we keep all implementation details in `beacon_controller` there shouldn't be much to worry about, and the only thing you will need to do is plug the `beacon_controller` package back in. Again, a `git diff` will show where this needs to be done.

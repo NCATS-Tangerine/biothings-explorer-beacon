@@ -47,33 +47,39 @@ def get_concept_details(conceptId):
     return c
 
 def get_concepts(keywords, categories=None, offset=None, size=None):
+    """
+    Biothings explorer doesn't support this sort of query.
+    """
     return []
 
 def get_exact_matches_to_concept_list(c):
     response = []
 
     for curie in c:
-        if not isinstance(curie, str) or ':' not in curie:
-            continue
+        try:
+            if not isinstance(curie, str) or ':' not in curie:
+                continue
 
-        exact_matches = []
+            exact_matches = []
 
-        data = crawler.crawl(curie)
+            data = crawler.crawl(curie)
 
-        for category, associations in data.items():
-            for a in associations:
-                if a.get('predicate') == 'EquivalentAssociation':
-                    object_id = safe_get(a, 'object', 'id')
+            for category, associations in data.items():
+                for a in associations:
+                    if a.get('predicate') == 'EquivalentAssociation':
+                        object_id = safe_get(a, 'object', 'id')
 
-                    prefix, local_id = object_id.split(':', 1)
+                        prefix, local_id = object_id.split(':', 1)
 
-                    if 'name' not in prefix.lower():
-                        exact_matches.append(fix_curie(object_id))
+                        if 'name' not in prefix.lower():
+                            exact_matches.append(fix_curie(object_id))
 
-        response.append(ExactMatchResponse(
-            id=curie,
-            within_domain=data != {},
-            has_exact_matches=exact_matches
-        ))
+            response.append(ExactMatchResponse(
+                id=curie,
+                within_domain=data != {},
+                has_exact_matches=exact_matches
+            ))
+        except:
+            pass
 
     return response

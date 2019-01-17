@@ -1,3 +1,7 @@
+"""
+This package holds implementation details for the beacon package
+"""
+
 from config import config
 
 from . import utils, biolink_model
