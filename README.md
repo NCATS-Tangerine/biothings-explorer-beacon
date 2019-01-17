@@ -37,7 +37,7 @@ make run
 
 View it at http://localhost:8080
 
-Alternatively you can run the application as a Docker container:
+Alternatively you can run the application within a [Docker](https://docs.docker.com/engine/installation/) container:
 
 ```shell
 make docker-build
